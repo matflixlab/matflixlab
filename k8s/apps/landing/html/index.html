@@ -125,13 +125,23 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
     .site-header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -1px; color: var(--text); }
     .site-header h1 .hl { color: var(--accent); }
     .site-header .tagline { margin-top: 0.5rem; color: var(--muted); font-size: 0.85rem; }
     .site-header .tagline span { color: var(--accent2); }
 
-    /* ── SECTION LABEL ── */
+    @media (max-width: 480px) {
+      .site-header-top { flex-direction: column; align-items: flex-start; }
+      .header-controls { margin-top: 0; }
+      .site-header h1 { font-size: 2rem; }
+      .contact-form .form-row { flex-direction: column; }
+      .details-diagram.scale2 .mermaid { transform: scale(1); margin-bottom: 0; }
+      .details-diagram { padding: 1rem 0.5rem; }
+    }
+
     .section-label {
       font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
       letter-spacing: 2px; margin-bottom: 1rem;
