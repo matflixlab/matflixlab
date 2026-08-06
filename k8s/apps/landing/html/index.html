@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>matflixlab</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+    var MERMAID_DARK = {
+      theme: 'dark',
+      themeVariables: {
+        background:          '#0a0a0a',
+        primaryColor:        '#1e1e2e',
+        primaryTextColor:    '#e0e0e0',
+        primaryBorderColor:  '#6366f1',
+        lineColor:           '#555',
+        secondaryColor:      '#111',
+        tertiaryColor:       '#111',
+        clusterBkg:          '#111111',
+        titleColor:          '#e0e0e0',
+        edgeLabelBackground: '#0a0a0a',
+        nodeBorder:          '#6366f1',
+      }
+    };
+    var MERMAID_LIGHT = {
+      theme: 'default',
+      themeVariables: {
+        background:          '#f5f5f0',
+        primaryColor:        '#ebe8ff',
+        primaryTextColor:    '#1a1a1a',
+        primaryBorderColor:  '#4f46e5',
+        lineColor:           '#999',
+        secondaryColor:      '#f0f0eb',
+        tertiaryColor:       '#f0f0eb',
+        clusterBkg:          '#ebebeb',
+        titleColor:          '#1a1a1a',
+        edgeLabelBackground: '#f5f5f0',
+        nodeBorder:          '#4f46e5',
+      }
+    };
+    function isLight() {
+      return document.documentElement.getAttribute('data-theme') === 'light';
+    }
+    mermaid.initialize({ startOnLoad: false, ...(isLight() ? MERMAID_LIGHT : MERMAID_DARK) });
+    window.addEventListener('DOMContentLoaded', () => {
+      mermaid.run({ querySelector: '.mermaid' });
+    });
+    document.addEventListener('toggle', (e) => {
+      if (e.target.tagName === 'DETAILS' && e.target.open) {
+        const diagrams = e.target.querySelectorAll('.mermaid:not([data-processed])');
+        if (diagrams.length > 0) mermaid.run({ nodes: diagrams });
+      }
+    }, true);
+  </script>
+  <style>
+    /* ── THEME TOKENS ── */
+    :root {
+      --bg:      #0a0a0a;
+      --surface: #111111;
+      --border:  #1e1e1e;
+      --accent:  #6366f1;
+      --accent2: #22d3ee;
+      --text:    #e0e0e0;
+      --muted:   #555;
+      --green:   #4ade80;
+      --yellow:  #facc15;
+      --text-secondary: #aaa;
+    }
+    [data-theme="light"] {
+      --bg:      #f5f5f0;
+      --surface: #ebebeb;
+      --border:  #d4d4cc;
+      --accent:  #4f46e5;
+      --accent2: #0891b2;
+      --text:    #1a1a1a;
+      --muted:   #888;
+      --green:   #16a34a;
+      --yellow:  #ca8a04;
+      --text-secondary: #555;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* ── HEADER CONTROLS ── */
+    .header-controls {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+    }
+    .theme-toggle, .lang-toggle {
+      font-family: inherit;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .theme-toggle:hover { color: var(--accent2); border-color: var(--accent2); }
+    .lang-toggle:hover  { color: var(--accent);  border-color: var(--accent);  }
+    .lang-toggle.active { color: var(--accent);  border-color: var(--accent);  }
+
+    /* ── HEADER ── */
+    .site-header { margin-bottom: 3rem; }
+    .site-header .prompt { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .site-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .site-header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -1px; color: var(--text); }
+    .site-header h1 .hl { color: var(--accent); }
+    .site-header .tagline { margin-top: 0.5rem; color: var(--muted); font-size: 0.85rem; }
+    .site-header .tagline span { color: var(--accent2); }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 2px; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── ABOUT ── */
+    .about {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent); border-radius: 6px;
+      padding: 1.25rem 1.5rem; font-size: 0.88rem; line-height: 1.75;
+      color: var(--text-secondary); margin-bottom: 2.5rem;
+    }
+    .about strong { color: var(--text); }
+
+    /* ── STACK ── */
+    .stack-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2.5rem; }
+    .stack-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.3rem 0.75rem;
+      font-size: 0.75rem; color: var(--text-secondary);
+    }
+    .stack-item .dot {
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; margin-right: 0.4rem; vertical-align: middle;
+    }
+
+    /* ── DIAGRAM WRAP ── */
+    .diagram-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 2rem; overflow-x: auto;
+      display: flex; justify-content: center; margin-bottom: 2.5rem;
+    }
+
+    /* ── SERVICES ── */
+    .services { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem; }
+    .service-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden;
+    }
+    .service-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 1.25rem 1.5rem; text-decoration: none; color: inherit;
+      transition: background 0.15s; flex-direction: column; gap: 0.5rem;
+    }
+    .service-header:hover { background: var(--border); }
+    .service-header-left { display: flex; align-items: flex-start; gap: 1rem; width: 100%; }
+    .service-name-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; }
+    .service-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .service-desc { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.5; padding-left: 1.25rem; }
+    .service-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; padding-left: 1.25rem; }
+    .badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--border); color: var(--accent); }
+    .badge.priv { color: var(--yellow); }
+    .service-header-right { display: none; }
+    .ext-link {
+      font-size: 0.7rem; color: var(--muted);
+      display: block; margin-top: 0.1rem; margin-bottom: 0.1rem; padding-left: 1.25rem;
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+    }
+    .status-dot.private { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+
+    /* ── DETAILS / SUMMARY ── */
+    details { border-top: 1px solid var(--border); }
+    summary {
+      list-style: none; padding: 0.75rem 1.5rem; font-size: 0.72rem;
+      color: var(--muted); cursor: pointer; display: flex;
+      align-items: center; gap: 0.5rem; user-select: none; transition: color 0.15s;
+    }
+    summary:hover { color: var(--accent2); }
+    summary::before { content: '▶'; font-size: 0.6rem; transition: transform 0.2s; }
+    details[open] summary::before { transform: rotate(90deg); }
+    details[open] summary { color: var(--accent2); }
+    .details-diagram {
+      padding: 1.5rem; background: var(--bg); border-top: 1px solid var(--border);
+      overflow-x: auto; display: flex; justify-content: center;
+    }
+    .details-diagram .mermaid { transform: scale(1); transform-origin: top center; margin-bottom: 0; }
+    .details-diagram.scale2 .mermaid { transform: scale(2); transform-origin: top center; margin-bottom: 15%; }
+
+    /* ── PORTFOLIO ── */
+    .portfolio-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2); border-radius: 6px;
+      padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;
+    }
+    .portfolio-name { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+    .portfolio-role { font-size: 0.8rem; color: var(--accent2); margin-bottom: 0.75rem; }
+    .portfolio-bio { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 1rem; }
+    .portfolio-bio strong { color: var(--text); }
+    .portfolio-skills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; }
+    .skill-tag {
+      font-size: 0.68rem; padding: 2px 8px; border-radius: 3px;
+      border: 1px solid var(--border); color: var(--text-secondary);
+    }
+    .portfolio-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn {
+      font-family: inherit; font-size: 0.75rem; padding: 0.4rem 1rem;
+      border-radius: 4px; border: 1px solid var(--border);
+      cursor: pointer; text-decoration: none; display: inline-flex;
+      align-items: center; gap: 0.4rem; transition: border-color 0.15s, color 0.15s;
+      background: transparent; color: var(--text-secondary);
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary { border-color: var(--accent); color: var(--accent); }
+    .btn.primary:hover { background: var(--accent); color: #fff; }
+
+    /* ── STATS ── */
+    .stats-bar { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem; }
+    .stat-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.9rem 1.25rem; flex: 1; min-width: 120px;
+    }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent2); }
+    .stat-label { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* ── CONTACT FORM ── */
+    .contact-tagline {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .contact-tagline br { display: block; }
+    .contact-form {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2); border-radius: 6px;
+      padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;
+    }
+    .contact-form .form-row {
+      display: flex; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap;
+    }
+    .contact-form input,
+    .contact-form textarea {
+      font-family: inherit; font-size: 0.8rem;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 0.5rem 0.75rem; width: 100%;
+      transition: border-color 0.15s;
+      outline: none;
+      resize: vertical;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus { border-color: var(--accent2); }
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder { color: var(--muted); }
+    .contact-form textarea { min-height: 100px; }
+    .contact-form .form-row input { flex: 1; min-width: 140px; }
+    .contact-form .form-footer {
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .contact-form .form-note { font-size: 0.7rem; color: var(--muted); }
+    .contact-form .form-status {
+      font-size: 0.75rem; padding: 0.3rem 0.75rem;
+      border-radius: 4px; display: none;
+    }
+    .contact-form .form-status.success {
+      display: inline-block; color: var(--green);
+      border: 1px solid var(--green); background: transparent;
+    }
+    .contact-form .form-status.error {
+      display: inline-block; color: var(--yellow);
+      border: 1px solid var(--yellow); background: transparent;
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      border-top: 1px solid var(--border); padding-top: 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.72rem; color: var(--muted); flex-wrap: wrap; gap: 0.5rem;
+    }
+    .site-footer a { color: var(--muted); text-decoration: none; }
+    .site-footer a:hover { color: var(--accent); }
+  </style>
+  <!-- Umami tracking -->
+  <script defer src="https://umami.matflixlab.pl/script.js" data-website-id="93324562-e1ea-478b-9c9e-8fed70384d06"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="prompt">~/matflixlab $</div>
+    <div class="site-header-top">
+      <div>
+        <h1>matflix<span class="hl">lab</span></h1>
+        <div class="tagline">
+          self-hosted homelab &mdash;
+          <span>k3s</span> &middot; <span>kubernetes</span> &middot; <span>cloudflare</span>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button class="lang-toggle" id="lang-en" onclick="setLang('en')" aria-label="Switch to English">EN</button>
+        <button class="lang-toggle" id="lang-pl" onclick="setLang('pl')" aria-label="Przełącz na polski">PL</button>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+          <span id="toggle-icon">○</span>
+          <span id="toggle-label">light</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════
+       THEME + LANG CONTROLLER
+  ═══════════════════════════════════════════════ -->
+  <script>
+  // ── TRANSLATIONS ──────────────────────────────────────────────────────────
+  var TRANSLATIONS = {
+    en: {
+      // section labels
+      'label.about':          'about',
+      'label.stats':          'site stats',
+      'label.portfolio':      'portfolio',
+      'label.homelab-stack':  'homelab-stack',
+      'label.services':       'services',
+
+      // about block
+      'about.text': 'A personal homelab running on a <strong>single-node k3s cluster</strong> hosted on an old laptop. Serves as a platform for learning <strong>Kubernetes</strong>, experimenting with <strong>self-hosted applications</strong>, and deploying real projects. All services are containerised, managed via <strong>Kustomize</strong> manifests, and exposed to the internet through a <strong>Cloudflare Tunnel</strong> &mdash; no open ports, no public IP required.',
+
+      // stats labels
+      'stat.visitors':  'unique visitors (30d)',
+      'stat.pageviews': 'pageviews (30d)',
+      'stat.visits':    'visits (30d)',
+      'stat.countries': 'countries',
+
+      // portfolio
+      'portfolio.role': 'DevOps / SRE Engineer',
+      'portfolio.bio':  '<strong>3+ years</strong> in DevOps/SRE supporting trading and market-making platforms at <strong>Match-Trade Technologies</strong>. Day-to-day work spans <strong>AWS infrastructure</strong> with 200+ servers across 8 regions, a <strong>47-role Ansible framework</strong>, <strong>200+ Jenkins pipelines</strong>. Developing and maintaining this platform to deepen <strong>Kubernetes</strong> expertise and ship personal projects.',
+      'portfolio.cv':       '&#8659; download cv',
+      'portfolio.linkedin': 'linkedin &#8599;',
+
+      // homelab stack card
+      'homelab.desc': 'Single-node homelab running on a laptop. Built on <strong>k3s</strong> — a lightweight Kubernetes distribution. All services are containerised and managed via <strong>Kustomize</strong> manifests. Exposed to the internet through a <strong>Cloudflare Tunnel</strong> — no open ports, no public IP required. Used as a platform for learning Kubernetes and shipping personal projects.',
+      'homelab.arch': 'architecture — network flow',
+
+      // SpeakStats
+      'speakstats.desc': 'Speech analysis tool. Upload audio or video, get a transcript via local whisper.cpp inference, and see word frequency and filler word stats. Fully local — no data leaves the server.',
+      'speakstats.arch': 'architecture',
+
+      // Jellyfin
+      'jellyfin.desc': 'Self-hosted media server for movies, TV shows and music. Access restricted to approved users.',
+      'jellyfin.arch': 'architecture',
+
+      // Umami
+      'umami.desc':    'Self-hosted, privacy-focused web analytics for matflixlab.pl. Live visitor stats, countries, pages and referrers — public read-only dashboard.',
+      'umami.extlink': 'view dashboard &#8599;',
+
+      // footer
+      'footer.text': 'matflixlab.pl &mdash; running on k3s',
+
+      // theme button
+      'theme.to-light': 'light',
+      'theme.to-dark':  'dark',
+
+      // contact form
+      'contact.tagline':                 '// found a bug? got an idea? just want to say hi?<br>// drop a message — all feedback welcome.',
+      'label.contact':                   'contact',
+      'contact.placeholder.nickname':    'nickname',
+      'contact.placeholder.email':       'e-mail (optional)',
+      'contact.placeholder.message':     'your message...',
+      'contact.note':                    'replies go to matflix.movies@gmail.com',
+      'contact.submit':                  'send &#8594;',
+      'contact.sending':                 'sending...',
+      'contact.success':                 '✓ message sent!',
+      'contact.error':                   '✗ something went wrong, try again',
+      'contact.limit':                   '✗ message limit reached (3/3)',
+    },
+    pl: {
+      // section labels
+      'label.about':          'o projekcie',
+      'label.stats':          'statystyki',
+      'label.portfolio':      'portfolio',
+      'label.homelab-stack':  'stos technologiczny',
+      'label.services':       'serwisy',
+
+      // about block
+      'about.text': 'Prywatny homelab działający na <strong>jednowęzłowym klastrze k3s</strong> hostowanym na starym laptopie. Służy jako platforma do nauki <strong>Kubernetesa</strong>, eksperymentowania z <strong>self-hostowanymi aplikacjami</strong> i wdrażania własnych projektów. Wszystkie serwisy są skonteneryzowane, zarządzane przez manifesty <strong>Kustomize</strong> i udostępniane przez <strong>Cloudflare Tunnel</strong> &mdash; bez otwartych portów, bez publicznego IP.',
+
+      // stats labels
+      'stat.visitors':  'unikalni odwiedzający (30d)',
+      'stat.pageviews': 'odsłony (30d)',
+      'stat.visits':    'wizyty (30d)',
+      'stat.countries': 'kraje',
+
+      // portfolio
+      'portfolio.role': 'Inżynier DevOps / SRE',
+      'portfolio.bio':  '<strong>3+ lata</strong> w DevOps/SRE przy platformach tradingowych i market-makingowych w <strong>Match-Trade Technologies</strong>. Codzienna praca obejmuje <strong>infrastrukturę AWS</strong> z 200+ serwerami w 8 regionach, <strong>framework Ansible złożony z 47 ról</strong> oraz <strong>200+ pipeline\'ów Jenkins</strong>. Projekt prowadzony w celu pogłębienia wiedzy o <strong>Kubernetesie</strong> i wdrażania własnych projektów.',
+      'portfolio.cv':       '&#8659; pobierz cv',
+      'portfolio.linkedin': 'linkedin &#8599;',
+
+      // homelab stack card
+      'homelab.desc': 'Jednowęzłowy homelab działający na laptopie. Oparty na <strong>k3s</strong> — lekkiej dystrybucji Kubernetesa. Wszystkie serwisy są skonteneryzowane i zarządzane przez manifesty <strong>Kustomize</strong>. Udostępniane przez <strong>Cloudflare Tunnel</strong> — bez otwartych portów, bez publicznego IP. Platforma do nauki Kubernetesa i wdrażania własnych projektów.',
+      'homelab.arch': 'architektura — przepływ sieciowy',
+
+      // SpeakStats
+      'speakstats.desc': 'Narzędzie do analizy mowy. Prześlij audio lub wideo, otrzymaj transkrypcję przez lokalny model whisper.cpp i sprawdź statystyki słów oraz wypełniaczy. W pełni lokalne — żadne dane nie opuszczają serwera.',
+      'speakstats.arch': 'architektura',
+
+      // Jellyfin
+      'jellyfin.desc': 'Własny serwer mediów do filmów, seriali i muzyki. Dostęp ograniczony do zatwierdzonych użytkowników.',
+      'jellyfin.arch': 'architektura',
+
+      // Umami
+      'umami.desc':    'Własne, nastawione na prywatność narzędzie analityczne dla matflixlab.pl. Statystyki odwiedzin, kraje, strony i źródła ruchu — publiczny panel tylko do odczytu.',
+      'umami.extlink': 'otwórz panel &#8599;',
+
+      // footer
+      'footer.text': 'matflixlab.pl &mdash; działa na k3s',
+
+      // theme button
+      'theme.to-light': 'jasny',
+      'theme.to-dark':  'ciemny',
+
+      // contact form
+      'contact.tagline':                 '// znalazłeś błąd? masz pomysł? chcesz po prostu napisać?<br>// zostaw wiadomość — każdy feedback mile widziany.',
+      'label.contact':                   'kontakt',
+      'contact.placeholder.nickname':    'pseudonim',
+      'contact.placeholder.email':       'e-mail (opcjonalnie)',
+      'contact.placeholder.message':     'twoja wiadomość...',
+      'contact.note':                    'odpowiedzi trafiają na matflix.movies@gmail.com',
+      'contact.submit':                  'wyślij &#8594;',
+      'contact.sending':                 'wysyłanie...',
+      'contact.success':                 '✓ wiadomość wysłana!',
+      'contact.error':                   '✗ coś poszło nie tak, spróbuj ponownie',
+      'contact.limit':                   '✗ limit wiadomości osiągnięty (3/3)',
+    }
+  };
+  </script>
+
+  <script>
+  // ── LANG ENGINE ───────────────────────────────────────────────────────────
+  var LANG_KEY  = 'mllab-lang';
+  var THEME_KEY = 'mllab-theme';
+
+  function applyLang(lang) {
+    var t = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+    document.documentElement.lang = lang;
+
+    // update all [data-i18n] elements
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      if (t[key] !== undefined) el.innerHTML = t[key];
+    });
+
+    // update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      if (t[key] !== undefined) el.placeholder = t[key];
+    });
+
+    // update theme-button label (depends on active theme)
+    var isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    var label = document.getElementById('toggle-label');
+    if (label) label.innerHTML = isDark ? t['theme.to-light'] : t['theme.to-dark'];
+
+    // highlight active lang button
+    ['en','pl'].forEach(function(l) {
+      var btn = document.getElementById('lang-' + l);
+      if (btn) btn.classList.toggle('active', l === lang);
+    });
+
+    localStorage.setItem(LANG_KEY, lang);
+  }
+
+  function setLang(lang) { applyLang(lang); }
+
+  // ── THEME ENGINE ──────────────────────────────────────────────────────────
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    var lang = localStorage.getItem(LANG_KEY) || 'en';
+    var t    = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+    var icon  = document.getElementById('toggle-icon');
+    var label = document.getElementById('toggle-label');
+    if (icon)  icon.textContent = theme === 'light' ? '●' : '○';
+    if (label) label.innerHTML  = theme === 'light' ? t['theme.to-dark'] : t['theme.to-light'];
+    localStorage.setItem(THEME_KEY, theme);
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  (function() {
+    // theme — apply before paint to avoid flash
+    var savedTheme = localStorage.getItem(THEME_KEY);
+    if (!savedTheme) {
+      savedTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    applyTheme(savedTheme);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // lang
+      var savedLang = localStorage.getItem(LANG_KEY) || 'en';
+      applyLang(savedLang);
+
+      // wire theme button
+      var btn = document.getElementById('theme-toggle');
+      if (btn) {
+        btn.addEventListener('click', function() {
+          var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+          applyTheme(next);
+        });
+      }
+    });
+  })();
+  </script>
+
+  <!-- ABOUT -->
+  <div class="section-label" data-i18n="label.about">about</div>
+  <div class="about" data-i18n="about.text">
+    A personal homelab running on a <strong>single-node k3s cluster</strong> hosted on an old laptop.
+    Serves as a platform for learning <strong>Kubernetes</strong>, experimenting with
+    <strong>self-hosted applications</strong>, and deploying real projects.
+    All services are containerised, managed via <strong>Kustomize</strong> manifests,
+    and exposed to the internet through a <strong>Cloudflare Tunnel</strong> &mdash;
+    no open ports, no public IP required.
+  </div>
+
+  <!-- STATS -->
+  <div class="section-label" data-i18n="label.stats">site stats</div>
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" id="stat-visitors">—</div>
+      <div class="stat-label" data-i18n="stat.visitors">unique visitors (30d)</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-pageviews">—</div>
+      <div class="stat-label" data-i18n="stat.pageviews">pageviews (30d)</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-visits">—</div>
+      <div class="stat-label" data-i18n="stat.visits">visits (30d)</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-countries">—</div>
+      <div class="stat-label" data-i18n="stat.countries">countries</div>
+    </div>
+  </div>
+
+  <!-- UMAMI STATS SCRIPT -->
+  <script>
+    (function() {
+      var siteId = '93324562-e1ea-478b-9c9e-8fed70384d06';
+      var INTERVAL = 30000;
+      var cachedToken = null;
+      var tokenExpiry = 0;
+
+      function fmt(n) {
+        if (n === undefined || n === null) return '—';
+        return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
+      }
+      function set(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = val;
+      }
+      function fetchStats(token) {
+        var end = Date.now();
+        var start = end - 30 * 24 * 60 * 60 * 1000;
+        var headers = { 'Authorization': 'Bearer ' + token };
+        fetch('https://umami.matflixlab.pl/api/websites/' + siteId + '/stats?startAt=' + start + '&endAt=' + end, { headers: headers })
+          .then(function(r) { if (!r.ok) { cachedToken = null; return Promise.reject(r.status); } return r.json(); })
+          .then(function(d) {
+            set('stat-visitors',  fmt(d.visitors));
+            set('stat-pageviews', fmt(d.pageviews));
+            set('stat-visits',    fmt(d.visits));
+          })
+          .catch(function() { cachedToken = null; });
+        fetch('https://umami.matflixlab.pl/api/websites/' + siteId + '/metrics?type=country&startAt=' + start + '&endAt=' + end, { headers: headers })
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+          .then(function(d) { if (Array.isArray(d)) set('stat-countries', d.length); })
+          .catch(function() {});
+      }
+      function tick() {
+        if (cachedToken && Date.now() < tokenExpiry) { fetchStats(cachedToken); return; }
+        fetch('https://umami.matflixlab.pl/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'admin', password: 'umami' })
+        })
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+          .then(function(d) {
+            if (d.token) {
+              cachedToken = d.token;
+              tokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
+              fetchStats(cachedToken);
+            }
+          })
+          .catch(function() {});
+      }
+      tick();
+      setInterval(tick, INTERVAL);
+    })();
+  </script>
+
+  <!-- PORTFOLIO -->
+  <div class="section-label" data-i18n="label.portfolio">portfolio</div>
+  <div class="portfolio-card">
+    <div class="portfolio-name">Mateusz Jochemski</div>
+    <div class="portfolio-role" data-i18n="portfolio.role">DevOps / SRE Engineer</div>
+    <div class="portfolio-bio" data-i18n="portfolio.bio">
+      <strong>3+ years</strong> in DevOps/SRE supporting trading and market-making platforms at
+      <strong>Match-Trade Technologies</strong>. Day-to-day work spans
+      <strong>AWS infrastructure</strong> with 200+ servers across 8 regions, a <strong>47-role Ansible framework</strong>,
+      <strong>200+ Jenkins pipelines</strong>.
+      Developing and maintaining this platform to deepen <strong>Kubernetes</strong> expertise and ship personal projects.
+    </div>
+    <div class="portfolio-skills">
+      <span class="skill-tag">AWS</span>
+      <span class="skill-tag">Kubernetes / EKS / k3s</span>
+      <span class="skill-tag">Ansible</span>
+      <span class="skill-tag">Terraform / OpenTofu</span>
+      <span class="skill-tag">Jenkins</span>
+      <span class="skill-tag">GitLab CI</span>
+      <span class="skill-tag">Docker</span>
+      <span class="skill-tag">Prometheus / Grafana</span>
+      <span class="skill-tag">Elasticsearch</span>
+      <span class="skill-tag">PostgreSQL</span>
+      <span class="skill-tag">Python</span>
+      <span class="skill-tag">Bash</span>
+      <span class="skill-tag">MCP / AI tooling</span>
+    </div>
+    <div class="portfolio-actions">
+      <a class="btn primary" href="/cv/3ys_DevOps_mjochemski.pdf" download data-i18n="portfolio.cv" onclick="if(window.umami) umami.track('cv-download')">&#8659; download cv</a>
+      <a class="btn" href="https://linkedin.com/in/mateusz-jochemski" target="_blank" data-i18n="portfolio.linkedin">linkedin &#8599;</a>
+    </div>
+  </div>
+
+  <!-- HOMELAB STACK -->
+  <div class="section-label" data-i18n="label.homelab-stack">homelab-stack</div>
+  <div class="services" style="margin-bottom: 2.5rem;">
+    <div class="service-card">
+      <div class="service-header" style="cursor: default;">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot" title="running"></span>
+              <span class="service-name">matflixlab</span>
+            </div>
+            <div class="service-desc" data-i18n="homelab.desc">
+              Single-node homelab running on a laptop. Built on <strong>k3s</strong> — a lightweight Kubernetes distribution.
+              All services are containerised and managed via <strong>Kustomize</strong> manifests.
+              Exposed to the internet through a <strong>Cloudflare Tunnel</strong> — no open ports, no public IP required.
+              Used as a platform for learning Kubernetes and shipping personal projects.
+            </div>
+            <div class="service-badges" style="margin-top: 0.9rem;">
+              <span class="stack-item"><span class="dot" style="background:#6366f1"></span>k3s / Kubernetes</span>
+              <span class="stack-item"><span class="dot" style="background:#22d3ee"></span>Traefik</span>
+              <span class="stack-item"><span class="dot" style="background:#f97316"></span>Cloudflare Tunnel</span>
+              <span class="stack-item"><span class="dot" style="background:#4ade80"></span>containerd</span>
+              <span class="stack-item"><span class="dot" style="background:#a78bfa"></span>Kustomize</span>
+              <span class="stack-item"><span class="dot" style="background:#38bdf8"></span>Next.js 15</span>
+              <span class="stack-item"><span class="dot" style="background:#facc15"></span>whisper.cpp</span>
+              <span class="stack-item"><span class="dot" style="background:#f472b6"></span>nginx</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <details>
+        <summary data-i18n="homelab.arch">architecture — network flow</summary>
+        <div class="details-diagram">
+          <div class="mermaid">
+flowchart TD
+    Internet(("Internet"))
+    CF["Cloudflare Edge\nDNS + TLS termination\nmatflixlab.pl"]
+    TUN["cloudflared\nsystemd service"]
+    TR["Traefik\nIngress Controller\nk3s built-in"]
+    LAND["landing\nnginx :80"]
+    SS["speakstats\nNext.js 15 :3000"]
+    WHIS["whisper.cpp\n:8080 internal"]
+    JF["jellyfin\n:8096"]
+
+    Internet -->|HTTPS| CF
+    CF -->|QUIC tunnel| TUN
+    TUN -->|HTTP :80| TR
+    TR -->|matflixlab.pl| LAND
+    TR -->|speakstats.*| SS
+    TR -->|jellyfin.*| JF
+    SS -->|ClusterIP| WHIS
+
+    classDef cloud   fill:#1a1a2e,stroke:#f97316,color:#f97316
+    classDef infra   fill:#0f1923,stroke:#22d3ee,color:#22d3ee
+    classDef service fill:#0f1f0f,stroke:#4ade80,color:#4ade80
+    classDef intern  fill:#1a1a1a,stroke:#555,color:#888
+
+    class Internet,CF cloud
+    class TUN,TR infra
+    class LAND,SS,JF service
+    class WHIS intern
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="section-label" data-i18n="label.services">services</div>
+  <div class="services">
+
+    <!-- SpeakStats -->
+    <div class="service-card">
+      <a class="service-header" href="https://speakstats.matflixlab.pl" target="_blank">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot" title="public"></span>
+              <span class="service-name">SpeakStats</span>
+            </div>
+            <span class="ext-link">speakstats.matflixlab.pl &#8599;</span>
+            <div class="service-desc" data-i18n="speakstats.desc">
+              Speech analysis tool. Upload audio or video, get a transcript via local
+              whisper.cpp inference, and see word frequency and filler word stats.
+              Fully local — no data leaves the server.
+            </div>
+            <div class="service-badges">
+              <span class="badge">Next.js 15</span>
+              <span class="badge">whisper.cpp</span>
+            </div>
+          </div>
+        </div>
+      </a>
+      <details>
+        <summary data-i18n="speakstats.arch">architecture</summary>
+        <div class="details-diagram scale2">
+          <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant CF as Cloudflare
+    participant TR as Traefik
+    participant SS as speakstats Next.js
+    participant WH as whisper.cpp
+    participant FS as uploads PVC
+
+    User->>CF: POST /api/analyze
+    CF->>TR: forward via QUIC tunnel
+    TR->>SS: route by Host header
+    SS->>FS: save temp WAV file
+    SS->>WH: POST /inference
+    WH-->>SS: transcript JSON
+    SS->>SS: analyze text
+    SS->>FS: delete temp file
+    SS-->>CF: stats + transcript
+    CF-->>User: JSON response
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Jellyfin -->
+    <div class="service-card">
+      <a class="service-header" href="https://jellyfin.matflixlab.pl" target="_blank">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot private" title="private — login required"></span>
+              <span class="service-name">Jellyfin</span>
+            </div>
+            <span class="ext-link">jellyfin.matflixlab.pl &#8599;</span>
+            <div class="service-desc" data-i18n="jellyfin.desc">
+              Self-hosted media server for movies, TV shows and music.
+              Access restricted to approved users.
+            </div>
+          </div>
+        </div>
+      </a>
+      <details>
+        <summary data-i18n="jellyfin.arch">architecture</summary>
+        <div class="details-diagram scale2">
+          <div class="mermaid">
+flowchart LR
+    subgraph kube ["kube-system"]
+        TR2["Traefik"]
+        DNS["CoreDNS"]
+        LP["local-path\nprovisioner"]
+    end
+
+    subgraph reg ["registry"]
+        REG["registry:2\nNodePort :30500"]
+    end
+
+    subgraph ml ["matflixlab"]
+        LAND2["landing\nnginx"]
+        SS2["speakstats\nNext.js"]
+        WHIS2["speakstats-whisper\nwhisper.cpp"]
+        JF2["jellyfin"]
+        SS2 -->|ClusterIP :8080| WHIS2
+    end
+
+    subgraph host ["host — matflix-server"]
+        PVC1[("jellyfin-config\nPVC 5Gi")]
+        PVC2[("speakstats-uploads\nPVC 5Gi")]
+        MEDIA[("media/\nmovies · tv · music\nhostPath")]
+        MODELS[("speakstats/models/\nggml-base.en.bin\nhostPath")]
+    end
+
+    JF2 --- PVC1
+    SS2 --- PVC2
+    JF2 --- MEDIA
+    WHIS2 --- MODELS
+    TR2 -->|Ingress| LAND2
+    TR2 -->|Ingress| SS2
+    TR2 -->|Ingress| JF2
+    REG -->|push/pull| SS2
+
+    classDef svc     fill:#0f1f0f,stroke:#4ade80,color:#4ade80
+    classDef infra   fill:#0f1923,stroke:#22d3ee,color:#22d3ee
+    classDef storage fill:#1a1213,stroke:#f472b6,color:#f472b6
+
+    class LAND2,SS2,WHIS2,JF2 svc
+    class TR2,DNS,LP,REG infra
+    class PVC1,PVC2,MEDIA,MODELS storage
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Umami -->
+    <div class="service-card">
+      <a class="service-header" href="https://umami.matflixlab.pl/share/T4XRFBmnPgMOKIk0" target="_blank">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot" title="public view"></span>
+              <span class="service-name">Umami Analytics</span>
+            </div>
+            <span class="ext-link" data-i18n="umami.extlink">view dashboard &#8599;</span>
+            <div class="service-desc" data-i18n="umami.desc">
+              Self-hosted, privacy-focused web analytics for matflixlab.pl.
+              Live visitor stats, countries, pages and referrers — public read-only dashboard.
+            </div>
+            <div class="service-badges">
+              <span class="badge">self-hosted</span>
+              <span class="badge">PostgreSQL</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- CONTACT -->
+  <div class="section-label" data-i18n="label.contact">contact</div>
+  <p class="contact-tagline" data-i18n="contact.tagline">// found a bug? got an idea? just want to say hi?<br>// drop a message — all feedback welcome.</p>
+  <div class="contact-form">
+    <form id="contact-form" action="https://formcarry.com/s/D8zQLX7XeAC" method="POST" accept-charset="UTF-8">
+      <div class="form-row">
+        <input type="text"  name="nickname" id="fc-nickname" placeholder="nickname" required autocomplete="off" data-i18n-placeholder="contact.placeholder.nickname">
+        <input type="email" name="email"    id="fc-email"    placeholder="e-mail (optional)" autocomplete="off" data-i18n-placeholder="contact.placeholder.email">
+      </div>
+      <textarea name="message" id="fc-message" placeholder="your message..." required data-i18n-placeholder="contact.placeholder.message"></textarea>
+      <input type="hidden" name="_gotcha" style="display:none">
+      <div class="form-footer">
+        <div style="display:flex;gap:0.5rem;align-items:center;margin-left:auto;">
+          <span class="form-status" id="fc-status"></span>
+          <button type="submit" class="btn primary" id="fc-submit" data-i18n="contact.submit">send &#8594;</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <footer class="site-footer">
+    <span data-i18n="footer.text">matflixlab.pl &mdash; running on k3s</span>
+  </footer>
+
+  <!-- CONTACT FORM AJAX -->
+  <script>
+    var SUBMIT_KEY  = 'mllab-submits';
+    var SUBMIT_MAX  = 3;
+
+    function getSubmitCount() {
+      return parseInt(localStorage.getItem(SUBMIT_KEY) || '0', 10);
+    }
+    function incSubmitCount() {
+      localStorage.setItem(SUBMIT_KEY, getSubmitCount() + 1);
+    }
+    function isLimitReached() {
+      return getSubmitCount() >= SUBMIT_MAX;
+    }
+
+    function applySubmitLimit() {
+      var submit = document.getElementById('fc-submit');
+      var status = document.getElementById('fc-status');
+      if (!submit || !status) return;
+      if (isLimitReached()) {
+        var lang = localStorage.getItem('mllab-lang') || 'en';
+        var t    = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+        submit.disabled      = true;
+        status.textContent   = t['contact.limit'];
+        status.className     = 'form-status error';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var form    = document.getElementById('contact-form');
+      var submit  = document.getElementById('fc-submit');
+      var status  = document.getElementById('fc-status');
+      if (!form) return;
+
+      // check limit on page load
+      applySubmitLimit();
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var lang = localStorage.getItem('mllab-lang') || 'en';
+        var t    = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+
+        if (isLimitReached()) {
+          status.textContent = t['contact.limit'];
+          status.className   = 'form-status error';
+          return;
+        }
+
+        submit.disabled      = true;
+        submit.innerHTML     = t['contact.sending'];
+        status.className     = 'form-status';
+        status.style.display = 'none';
+
+        var data = new FormData(form);
+
+        fetch(form.action, {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res.status === 200 || res.code === 200) {
+            incSubmitCount();
+            status.textContent = t['contact.success'];
+            status.className   = 'form-status success';
+            form.reset();
+            if (isLimitReached()) {
+              submit.disabled    = true;
+              status.textContent = t['contact.limit'];
+              status.className   = 'form-status error';
+            }
+          } else {
+            throw new Error('error');
+          }
+        })
+        .catch(function() {
+          status.textContent = t['contact.error'];
+          status.className   = 'form-status error';
+        })
+        .finally(function() {
+          if (!isLimitReached()) {
+            submit.disabled  = false;
+            submit.innerHTML = t['contact.submit'];
+          }
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Docker registry data
+registry-data/
+
+# Media files
+media/
+
+# CV PDFs (binary, serwowane z hostPath)
+cv/
+*.pdf
+
+# Images
+*.jpeg
+*.jpg
+*.png
+
+# Speakstats (osobne repo)
+speakstats/
+
+# Kiro sessions (nie potrzebne w repo)
+.kiro/sessions/
+
+# Kubernetes secrets
+k8s/**/secret.yaml

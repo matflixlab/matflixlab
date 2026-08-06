@@ -1,0 +1,7 @@
+# k3s registry configuration
+# Skopiuj ten plik do /etc/rancher/k3s/registries.yaml
+# i zrestartuj k3s: sudo systemctl restart k3s
+mirrors:
+  "localhost:30500":
+    endpoint:
+      - "http://localhost:30500"
