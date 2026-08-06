@@ -139,6 +139,31 @@
       .site-header h1 { font-size: 2rem; }
       .contact-form .form-row { flex-direction: column; }
     }
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tagline .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 0.85em;
+      background: var(--accent2);
+      margin-left: 1px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
 
     .section-label {
       font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
@@ -310,6 +335,35 @@
       border: 1px solid var(--yellow); background: transparent;
     }
 
+    /* ── TERMINAL WIDGET ── */
+    .terminal-widget {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+      height: calc(1.6em * 15 + 2rem);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .terminal-widget .tw-prompt { color: var(--green); }
+    .terminal-widget .tw-cmd    { color: var(--text); }
+    .terminal-widget .tw-output { color: var(--text-secondary); display: block; white-space: pre-wrap; word-break: break-all; }
+    .terminal-widget .tw-cursor {
+      display: inline-block; width: 7px; height: 0.85em;
+      background: var(--text); vertical-align: middle;
+      margin-left: 1px;
+      animation: blink 1s step-end infinite;
+    }
+
     /* ── FOOTER ── */
     .site-footer {
       border-top: 1px solid var(--border); padding-top: 1.5rem;
@@ -330,9 +384,6 @@
     <div class="site-header-top">
       <div>
         <h1>matflix<span class="hl">lab</span></h1>
-        <div class="tagline">
-          self-hosted homelab &mdash;
-          <span>k3s</span> &middot; <span>kubernetes</span> &middot; <span>cloudflare</span>
         </div>
       </div>
       <div class="header-controls">
@@ -552,9 +603,15 @@
   })();
   </script>
 
+  <!-- TERMINAL -->
+  <div class="terminal-widget fade-in" id="terminal-widget">
+    <div id="tw-lines"></div>
+    <div id="tw-active-line"><span class="tw-prompt" id="tw-prompt">matflix@matflix-server:~$&nbsp;</span><span class="tw-cmd" id="tw-cmd"></span><span class="tw-cursor" id="tw-cursor"></span></div>
+  </div>
+
   <!-- ABOUT -->
-  <div class="section-label" data-i18n="label.about">about</div>
-  <div class="about" data-i18n="about.text">
+  <div class="section-label fade-in" data-i18n="label.about">about</div>
+  <div class="about fade-in" data-i18n="about.text">
     A personal homelab running on a <strong>single-node k3s cluster</strong> hosted on an old laptop.
     Serves as a platform for learning <strong>Kubernetes</strong>, experimenting with
     <strong>self-hosted applications</strong>, and deploying real projects.
@@ -564,8 +621,8 @@
   </div>
 
   <!-- STATS -->
-  <div class="section-label" data-i18n="label.stats">site stats</div>
-  <div class="stats-bar" id="stats-bar">
+  <div class="section-label fade-in" data-i18n="label.stats">site stats</div>
+  <div class="stats-bar fade-in" id="stats-bar">
     <div class="stat-item">
       <div class="stat-value" id="stat-visitors">—</div>
       <div class="stat-label" data-i18n="stat.visitors">unique visitors (30d)</div>
@@ -640,8 +697,8 @@
   </script>
 
   <!-- PORTFOLIO -->
-  <div class="section-label" data-i18n="label.portfolio">portfolio</div>
-  <div class="portfolio-card">
+  <div class="section-label fade-in" data-i18n="label.portfolio">portfolio</div>
+  <div class="portfolio-card fade-in">
     <div class="portfolio-name">Mateusz Jochemski</div>
     <div class="portfolio-role" data-i18n="portfolio.role">DevOps / SRE Engineer</div>
     <div class="portfolio-bio" data-i18n="portfolio.bio">
@@ -673,8 +730,8 @@
   </div>
 
   <!-- HOMELAB STACK -->
-  <div class="section-label" data-i18n="label.homelab-stack">homelab-stack</div>
-  <div class="services" style="margin-bottom: 2.5rem;">
+  <div class="section-label fade-in" data-i18n="label.homelab-stack">homelab-stack</div>
+  <div class="services fade-in" style="margin-bottom: 2.5rem;">
     <div class="service-card">
       <div class="service-header" style="cursor: default;">
         <div class="service-header-left">
@@ -741,8 +798,8 @@ flowchart TD
   </div>
 
   <!-- SERVICES -->
-  <div class="section-label" data-i18n="label.services">services</div>
-  <div class="services">
+  <div class="section-label fade-in" data-i18n="label.services">services</div>
+  <div class="services fade-in">
 
     <!-- SpeakStats -->
     <div class="service-card">
@@ -813,9 +870,9 @@ flowchart TD
   </div>
 
   <!-- CONTACT -->
-  <div class="section-label" data-i18n="label.contact">contact</div>
-  <p class="contact-tagline" data-i18n="contact.tagline">// found a bug? got an idea? just want to say hi?<br>// drop a message — all feedback welcome.</p>
-  <div class="contact-form">
+  <div class="section-label fade-in" data-i18n="label.contact">contact</div>
+  <p class="contact-tagline fade-in" data-i18n="contact.tagline">// found a bug? got an idea? just want to say hi?<br>// drop a message — all feedback welcome.</p>
+  <div class="contact-form fade-in">
     <form id="contact-form" action="https://formcarry.com/s/D8zQLX7XeAC" method="POST" accept-charset="UTF-8">
       <div class="form-row">
         <input type="text"  name="nickname" id="fc-nickname" placeholder="nickname" required autocomplete="off" data-i18n-placeholder="contact.placeholder.nickname">
@@ -924,6 +981,119 @@ flowchart TD
         });
       });
     });
+  </script>
+
+  <!-- ANIMATIONS -->
+  <script>
+    // ── TERMINAL WIDGET ───────────────────────────────────────────────────
+    (function() {
+      var lines   = document.getElementById('tw-lines');
+      var prompt  = document.getElementById('tw-prompt');
+      var cmdEl   = document.getElementById('tw-cmd');
+      var cursor  = document.getElementById('tw-cursor');
+      if (!lines || !cmdEl) return;
+
+      var PROMPT1 = 'matflix@matflix-server:~$ ';
+      var PROMPT2 = 'matflix@matflix-server:~$ ';
+      var PROMPT3 = 'matflix@matflix-server:~$ ';
+
+      var CMD1 = 'mkdir -p matflixlab/{Kubernetes-k3s,Traefik,Cloudflare_Tunnel,containerd,Kustomize,Next.js_15,whisper.cpp,nginx}';
+      var CMD2 = 'ls -la matflixlab';
+
+      var LS_OUTPUT = [
+        'total 40',
+        'drwxrwxr-x 10 matflix matflix 4096 Aug  6 23:34 .',
+        'drwxrwxrwt 22 root    root    4096 Aug  6 23:34 ..',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Cloudflare_Tunnel',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 containerd',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Kubernetes-k3s',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Kustomize',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Next.js_15',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 nginx',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Traefik',
+        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 whisper.cpp',
+      ];
+
+      var SPD_TYPE = 28;
+      var SPD_ENTER_PAUSE = 400;
+      var SPD_LINE = 60;
+
+      function addLine(text) {
+        var span = document.createElement('span');
+        span.className = 'tw-output';
+        span.textContent = text;
+        lines.appendChild(span);
+      }
+
+      function typeCmd(cmd, done) {
+        var i = 0;
+        function t() {
+          if (i <= cmd.length) {
+            cmdEl.textContent = cmd.slice(0, i);
+            i++;
+            setTimeout(t, SPD_TYPE);
+          } else { done(); }
+        }
+        t();
+      }
+
+      function clearCmd() { cmdEl.textContent = ''; }
+
+      // STEP 1: type mkdir, pause, enter
+      setTimeout(function() {
+        typeCmd(CMD1, function() {
+          setTimeout(function() {
+            // "enter" — commit line to history, clear active
+            addLine(PROMPT1 + CMD1);
+            clearCmd();
+            // STEP 2: type ls -la
+            setTimeout(function() {
+              typeCmd(CMD2, function() {
+                setTimeout(function() {
+                  // "enter" — commit ls line
+                  addLine(PROMPT2 + CMD2);
+                  clearCmd();
+                  // STEP 3: print ls output line by line
+                  var idx = 0;
+                  function printLine() {
+                    if (idx < LS_OUTPUT.length) {
+                      addLine(LS_OUTPUT[idx]);
+                      idx++;
+                      setTimeout(printLine, SPD_LINE);
+                    } else {
+                      // STEP 4: final prompt, stop cursor
+                      prompt.textContent = 'matflix@matflix-server:~$ ';
+                      setTimeout(function() {
+                        cursor.style.animation = 'none';
+                        cursor.style.opacity   = '0';
+                      }, 3000);
+                    }
+                  }
+                  printLine();
+                }, SPD_ENTER_PAUSE);
+              });
+            }, 300);
+          }, SPD_ENTER_PAUSE);
+        });
+      }, 900);
+    })();
+
+    // ── INTERSECTION OBSERVER (fade-in on scroll) ─────────────────────────
+    (function() {
+      var els = document.querySelectorAll('.fade-in');
+      if (!els.length) return;
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+
+      els.forEach(function(el) { observer.observe(el); });
+    })();
   </script>
 
 </body>
