@@ -96,7 +96,46 @@ sudo chown matflix:matflix ~/.kube/config
 # potem kubectl działa bez sudo
 ```
 
-## Landing page — architektura kodu
+## Git workflow
+
+Repo zainicjowane lokalnie w `/home/matflix/matflixlab/`. Brak remote — tylko lokalne commity.
+
+### Co jest w repo
+- `k8s/` — wszystkie manifesty (bez `secret.yaml` — zawiera hasła)
+- `deploy.md` — dokumentacja
+- `.kiro/steering/` — steering file dla Kiro
+
+### Co jest w .gitignore
+- `registry-data/` — dane lokalnego Docker registry
+- `media/` — pliki wideo
+- `cv/` — pliki PDF
+- `speakstats/` — osobne repo
+- `k8s/**/secret.yaml` — sekrety k8s z hasłami w plaintexcie
+- `*.pdf`, `*.jpeg`, `*.jpg`, `*.png`
+
+### Commit po zmianie landing page
+
+```bash
+cd /home/matflix/matflixlab
+git add k8s/apps/landing/html/index.html
+git commit -m "landing: opis zmiany"
+```
+
+### Rollback do poprzedniej wersji
+
+```bash
+# znajdź hash commita
+git log --oneline k8s/apps/landing/html/index.html
+
+# przywróć plik
+git checkout <hash> -- k8s/apps/landing/html/index.html
+
+# wdróż na prod
+sudo kubectl create configmap landing-html \
+  --from-file=index.html=./k8s/apps/landing/html/index.html \
+  -n matflixlab --dry-run=client -o yaml | sudo kubectl apply -f -
+sudo kubectl rollout restart deployment/landing -n matflixlab
+```
 
 `index.html` to single-file aplikacja zawierająca:
 - **CSS** z CSS variables dla dark/light theme (`[data-theme="light"]`)
