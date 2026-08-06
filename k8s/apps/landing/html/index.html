@@ -346,7 +346,7 @@
       line-height: 1.6;
       margin-bottom: 2.5rem;
       font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
-      height: calc(1.6em * 15 + 2rem);
+      height: auto;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -380,7 +380,7 @@
 
   <!-- HEADER -->
   <header class="site-header">
-    <div class="prompt">~/matflixlab $</div>
+    <div class="prompt">~/matflixlab$</div>
     <div class="site-header-top">
       <div>
         <h1>matflix<span class="hl">lab</span></h1>
@@ -995,23 +995,16 @@ flowchart TD
 
       var PROMPT1 = 'matflix@matflix-server:~$ ';
       var PROMPT2 = 'matflix@matflix-server:~$ ';
-      var PROMPT3 = 'matflix@matflix-server:~$ ';
+      var PROMPT3 = 'matflix@matflix-server:~/matflixlab$ ';
 
       var CMD1 = 'mkdir -p matflixlab/{Kubernetes-k3s,Traefik,Cloudflare_Tunnel,containerd,Kustomize,Next.js_15,whisper.cpp,nginx}';
-      var CMD2 = 'ls -la matflixlab';
+      var CMD2 = 'cd matflixlab/ && ls';
 
       var LS_OUTPUT = [
-        'total 40',
-        'drwxrwxr-x 10 matflix matflix 4096 Aug  6 23:34 .',
-        'drwxrwxrwt 22 root    root    4096 Aug  6 23:34 ..',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Cloudflare_Tunnel',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 containerd',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Kubernetes-k3s',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Kustomize',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Next.js_15',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 nginx',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 Traefik',
-        'drwxrwxr-x  2 matflix matflix 4096 Aug  6 23:34 whisper.cpp',
+        'Cloudflare_Tunnel  containerd',
+        'Kubernetes-k3s     Kustomize',
+        'Next.js_15         nginx',
+        'Traefik            whisper.cpp',
       ];
 
       var SPD_TYPE = 28;
@@ -1062,7 +1055,7 @@ flowchart TD
                       setTimeout(printLine, SPD_LINE);
                     } else {
                       // STEP 4: final prompt, stop cursor
-                      prompt.textContent = 'matflix@matflix-server:~$ ';
+                      prompt.textContent = 'matflix@matflix-server:~/matflixlab$ ';
                       setTimeout(function() {
                         cursor.style.animation = 'none';
                         cursor.style.opacity   = '0';
