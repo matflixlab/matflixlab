@@ -138,8 +138,16 @@
       .header-controls { margin-top: 0; }
       .site-header h1 { font-size: 2rem; }
       .contact-form .form-row { flex-direction: column; }
-      .details-diagram.scale2 .mermaid { transform: scale(1); margin-bottom: 0; }
-      .details-diagram { padding: 1rem 0.5rem; }
+      .details-diagram { display: none; }
+      .details-diagram-mobile-note { display: block; }
+    }
+    .details-diagram-mobile-note {
+      display: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      font-style: italic;
     }
 
     .section-label {
@@ -737,6 +745,7 @@ flowchart TD
     class WHIS intern
           </div>
         </div>
+        <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
     </div>
   </div>
@@ -791,6 +800,7 @@ sequenceDiagram
     CF-->>User: JSON response
           </div>
         </div>
+        <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
     </div>
 
@@ -859,6 +869,7 @@ flowchart LR
     class PVC1,PVC2,MEDIA,MODELS storage
           </div>
         </div>
+        <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
     </div>
 
