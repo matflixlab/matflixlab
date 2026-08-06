@@ -138,16 +138,6 @@
       .header-controls { margin-top: 0; }
       .site-header h1 { font-size: 2rem; }
       .contact-form .form-row { flex-direction: column; }
-      .details-diagram { display: none; }
-      .details-diagram-mobile-note { display: block; }
-    }
-    .details-diagram-mobile-note {
-      display: none;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      font-style: italic;
     }
 
     .section-label {
@@ -776,32 +766,6 @@ flowchart TD
           </div>
         </div>
       </a>
-      <details>
-        <summary data-i18n="speakstats.arch">architecture</summary>
-        <div class="details-diagram scale2">
-          <div class="mermaid">
-sequenceDiagram
-    actor User
-    participant CF as Cloudflare
-    participant TR as Traefik
-    participant SS as speakstats Next.js
-    participant WH as whisper.cpp
-    participant FS as uploads PVC
-
-    User->>CF: POST /api/analyze
-    CF->>TR: forward via QUIC tunnel
-    TR->>SS: route by Host header
-    SS->>FS: save temp WAV file
-    SS->>WH: POST /inference
-    WH-->>SS: transcript JSON
-    SS->>SS: analyze text
-    SS->>FS: delete temp file
-    SS-->>CF: stats + transcript
-    CF-->>User: JSON response
-          </div>
-        </div>
-        <div class="details-diagram-mobile-note">diagram available on desktop</div>
-      </details>
     </div>
 
     <!-- Jellyfin -->
@@ -821,56 +785,6 @@ sequenceDiagram
           </div>
         </div>
       </a>
-      <details>
-        <summary data-i18n="jellyfin.arch">architecture</summary>
-        <div class="details-diagram scale2">
-          <div class="mermaid">
-flowchart LR
-    subgraph kube ["kube-system"]
-        TR2["Traefik"]
-        DNS["CoreDNS"]
-        LP["local-path\nprovisioner"]
-    end
-
-    subgraph reg ["registry"]
-        REG["registry:2\nNodePort :30500"]
-    end
-
-    subgraph ml ["matflixlab"]
-        LAND2["landing\nnginx"]
-        SS2["speakstats\nNext.js"]
-        WHIS2["speakstats-whisper\nwhisper.cpp"]
-        JF2["jellyfin"]
-        SS2 -->|ClusterIP :8080| WHIS2
-    end
-
-    subgraph host ["host — matflix-server"]
-        PVC1[("jellyfin-config\nPVC 5Gi")]
-        PVC2[("speakstats-uploads\nPVC 5Gi")]
-        MEDIA[("media/\nmovies · tv · music\nhostPath")]
-        MODELS[("speakstats/models/\nggml-base.en.bin\nhostPath")]
-    end
-
-    JF2 --- PVC1
-    SS2 --- PVC2
-    JF2 --- MEDIA
-    WHIS2 --- MODELS
-    TR2 -->|Ingress| LAND2
-    TR2 -->|Ingress| SS2
-    TR2 -->|Ingress| JF2
-    REG -->|push/pull| SS2
-
-    classDef svc     fill:#0f1f0f,stroke:#4ade80,color:#4ade80
-    classDef infra   fill:#0f1923,stroke:#22d3ee,color:#22d3ee
-    classDef storage fill:#1a1213,stroke:#f472b6,color:#f472b6
-
-    class LAND2,SS2,WHIS2,JF2 svc
-    class TR2,DNS,LP,REG infra
-    class PVC1,PVC2,MEDIA,MODELS storage
-          </div>
-        </div>
-        <div class="details-diagram-mobile-note">diagram available on desktop</div>
-      </details>
     </div>
 
     <!-- Umami -->
