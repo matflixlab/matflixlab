@@ -80,25 +80,126 @@
       --text-secondary: #555;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 56px; }
     body {
       font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 4rem;
     }
 
-    /* ── HEADER CONTROLS ── */
-    .header-controls {
+    /* ── STICKY NAVBAR ── */
+    .topnav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 52px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      gap: 1.5rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .topnav-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .topnav-logo .hl { color: var(--accent); }
+    .topnav-links {
+      display: flex;
+      gap: 0.25rem;
+      flex: 1;
+    }
+    .topnav-links a {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .topnav-links a:hover { color: var(--text); background: var(--surface); }
+    .topnav-controls {
       display: flex;
       gap: 0.4rem;
       align-items: center;
       flex-shrink: 0;
-      margin-top: 0.25rem;
     }
+    /* hamburger — mobile only */
+    .topnav-hamburger {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 1rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    /* mobile drawer */
+    .topnav-drawer {
+      display: none;
+      position: fixed;
+      top: 52px; left: 0; right: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem 1rem;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 99;
+    }
+    .topnav-drawer.open { display: flex; }
+    .topnav-drawer a {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .topnav-drawer a:last-of-type { border-bottom: none; }
+    .topnav-drawer a:hover { color: var(--text); }
+    .topnav-drawer-controls {
+      display: flex;
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .topnav-links { display: none; }
+      .topnav-controls { display: none; }
+      .topnav-hamburger { display: block; margin-left: auto; }
+    }
+
+    /* ── PAGE CONTENT ── */
+    .page-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+      padding-top: calc(52px + 2.5rem);
+    }
+
+    /* ── HEADER (hero) ── */
+    .site-header { margin-bottom: 3rem; }
+    .site-header .prompt { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .site-header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -1px; color: var(--text); }
+    .site-header h1 .hl { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .site-header h1 { font-size: 2rem; }
+      .contact-form .form-row { flex-direction: column; }
+      .terminal-widget { font-size: 0.58rem; height: auto; overflow: visible; }
+    }
+
+    /* ── TOGGLE BUTTONS (shared) ── */
     .theme-toggle, .lang-toggle {
       font-family: inherit;
       font-size: 0.72rem;
@@ -117,29 +218,6 @@
     .theme-toggle:hover { color: var(--accent2); border-color: var(--accent2); }
     .lang-toggle:hover  { color: var(--accent);  border-color: var(--accent);  }
     .lang-toggle.active { color: var(--accent);  border-color: var(--accent);  }
-
-    /* ── HEADER ── */
-    .site-header { margin-bottom: 3rem; }
-    .site-header .prompt { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.4rem; }
-    .site-header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-    .site-header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -1px; color: var(--text); }
-    .site-header h1 .hl { color: var(--accent); }
-    .site-header .tagline { margin-top: 0.5rem; color: var(--muted); font-size: 0.85rem; }
-    .site-header .tagline span { color: var(--accent2); }
-
-    @media (max-width: 600px) {
-      .site-header-top { flex-direction: column; align-items: flex-start; }
-      .header-controls { margin-top: 0; }
-      .site-header h1 { font-size: 2rem; }
-      .contact-form .form-row { flex-direction: column; }
-      .terminal-widget { font-size: 0.58rem; height: auto; overflow: visible; }
-    }
 
     /* ── ANIMATIONS ── */
     .fade-in {
@@ -364,6 +442,26 @@
       animation: blink 1s step-end infinite;
     }
 
+    /* ── NAV BAR ── */
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 2.5rem;
+    }
+    .site-nav a {
+      font-family: inherit;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.75rem;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .site-nav a:hover { color: var(--accent2); border-color: var(--accent2); }
+
     /* ── FOOTER ── */
     .site-footer {
       border-top: 1px solid var(--border); padding-top: 1.5rem;
@@ -378,23 +476,48 @@
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- STICKY NAVBAR -->
+  <nav class="topnav">
+    <a class="topnav-logo" href="#">matflix<span class="hl">lab</span></a>
+    <div class="topnav-links">
+      <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
+      <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
+      <a href="#services" data-i18n="nav.services">services</a>
+      <a href="#contact" data-i18n="nav.contact">contact</a>
+    </div>
+    <div class="topnav-controls">
+      <button class="lang-toggle" id="lang-en" onclick="setLang('en')" aria-label="Switch to English">EN</button>
+      <button class="lang-toggle" id="lang-pl" onclick="setLang('pl')" aria-label="Przełącz na polski">PL</button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+        <span id="toggle-icon">○</span>
+        <span id="toggle-label">light</span>
+      </button>
+    </div>
+    <button class="topnav-hamburger" id="hamburger" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- MOBILE DRAWER -->
+  <div class="topnav-drawer" id="topnav-drawer">
+    <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
+    <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
+    <a href="#services" data-i18n="nav.services">services</a>
+    <a href="#contact" data-i18n="nav.contact">contact</a>
+    <div class="topnav-drawer-controls">
+      <button class="lang-toggle" onclick="setLang('en')">EN</button>
+      <button class="lang-toggle" onclick="setLang('pl')">PL</button>
+      <button class="theme-toggle" onclick="document.getElementById('theme-toggle').click()">
+        <span id="toggle-icon-mob">○</span>
+        <span id="toggle-label-mob">light</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+  <!-- HERO -->
   <header class="site-header">
     <div class="prompt">~/matflixlab$</div>
-    <div class="site-header-top">
-      <div>
-        <h1>matflix<span class="hl">lab</span></h1>
-        </div>
-      </div>
-      <div class="header-controls">
-        <button class="lang-toggle" id="lang-en" onclick="setLang('en')" aria-label="Switch to English">EN</button>
-        <button class="lang-toggle" id="lang-pl" onclick="setLang('pl')" aria-label="Przełącz na polski">PL</button>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
-          <span id="toggle-icon">○</span>
-          <span id="toggle-label">light</span>
-        </button>
-      </div>
-    </div>
+    <h1>matflix<span class="hl">lab</span></h1>
   </header>
 
   <!-- ═══════════════════════════════════════════════
@@ -410,6 +533,12 @@
       'label.portfolio':      'portfolio',
       'label.homelab-stack':  'homelab-stack',
       'label.services':       'services',
+
+      // nav
+      'nav.portfolio':  'portfolio',
+      'nav.homelab':    'homelab-stack',
+      'nav.services':   'services',
+      'nav.contact':    'contact',
 
       // about block
       'about.text': 'A personal homelab running on a <strong>single-node k3s cluster</strong> hosted on an old laptop. Serves as a platform for learning <strong>Kubernetes</strong>, experimenting with <strong>self-hosted applications</strong>, and deploying real projects. All services are containerised, managed via <strong>Kustomize</strong> manifests, and exposed to the internet through a <strong>Cloudflare Tunnel</strong> &mdash; no open ports, no public IP required.',
@@ -469,6 +598,12 @@
       'label.portfolio':      'portfolio',
       'label.homelab-stack':  'stos technologiczny',
       'label.services':       'serwisy',
+
+      // nav
+      'nav.portfolio':  'portfolio',
+      'nav.homelab':    'stos technologiczny',
+      'nav.services':   'serwisy',
+      'nav.contact':    'kontakt',
 
       // about block
       'about.text': 'Prywatny homelab działający na <strong>jednowęzłowym klastrze k3s</strong> hostowanym na starym laptopie. Służy jako platforma do nauki <strong>Kubernetesa</strong>, eksperymentowania z <strong>self-hostowanymi aplikacjami</strong> i wdrażania własnych projektów. Wszystkie serwisy są skonteneryzowane, zarządzane przez manifesty <strong>Kustomize</strong> i udostępniane przez <strong>Cloudflare Tunnel</strong> &mdash; bez otwartych portów, bez publicznego IP.',
@@ -697,7 +832,7 @@
   </script>
 
   <!-- PORTFOLIO -->
-  <div class="section-label fade-in" data-i18n="label.portfolio">portfolio</div>
+  <div id="portfolio" class="section-label fade-in" data-i18n="label.portfolio">portfolio</div>
   <div class="portfolio-card fade-in">
     <div class="portfolio-name">Mateusz Jochemski</div>
     <div class="portfolio-role" data-i18n="portfolio.role">DevOps / SRE Engineer</div>
@@ -730,7 +865,7 @@
   </div>
 
   <!-- HOMELAB STACK -->
-  <div class="section-label fade-in" data-i18n="label.homelab-stack">homelab-stack</div>
+  <div id="homelab-stack" class="section-label fade-in" data-i18n="label.homelab-stack">homelab-stack</div>
   <div class="services fade-in" style="margin-bottom: 2.5rem;">
     <div class="service-card">
       <div class="service-header" style="cursor: default;">
@@ -798,7 +933,7 @@ flowchart TD
   </div>
 
   <!-- SERVICES -->
-  <div class="section-label fade-in" data-i18n="label.services">services</div>
+  <div id="services" class="section-label fade-in" data-i18n="label.services">services</div>
   <div class="services fade-in">
 
     <!-- SpeakStats -->
@@ -870,7 +1005,7 @@ flowchart TD
   </div>
 
   <!-- CONTACT -->
-  <div class="section-label fade-in" data-i18n="label.contact">contact</div>
+  <div id="contact" class="section-label fade-in" data-i18n="label.contact">contact</div>
   <p class="contact-tagline fade-in" data-i18n="contact.tagline">// found a bug? got an idea? just want to say hi?<br>// drop a message — all feedback welcome.</p>
   <div class="contact-form fade-in">
     <form id="contact-form" action="https://formcarry.com/s/D8zQLX7XeAC" method="POST" accept-charset="UTF-8">
@@ -1087,7 +1222,29 @@ flowchart TD
 
       els.forEach(function(el) { observer.observe(el); });
     })();
+
+    // ── HAMBURGER ─────────────────────────────────────────────────────────
+    (function() {
+      var btn    = document.getElementById('hamburger');
+      var drawer = document.getElementById('topnav-drawer');
+      if (!btn || !drawer) return;
+
+      btn.addEventListener('click', function() {
+        drawer.classList.toggle('open');
+        btn.textContent = drawer.classList.contains('open') ? '✕' : '☰';
+      });
+
+      // close on link click
+      drawer.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          drawer.classList.remove('open');
+          btn.textContent = '☰';
+        });
+      });
+    })();
   </script>
+
+  </div><!-- /page-content -->
 
 </body>
 </html>
