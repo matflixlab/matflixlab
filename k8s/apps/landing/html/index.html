@@ -196,7 +196,12 @@
     @media (max-width: 600px) {
       .site-header h1 { font-size: 2rem; }
       .contact-form .form-row { flex-direction: column; }
-      .terminal-widget { font-size: 0.58rem; height: auto; overflow: visible; }
+      .terminal-widget {
+        font-size: 0.58rem;
+        height: calc(1.6em * 14 + 2rem);
+        min-height: calc(1.6em * 14 + 2rem);
+        overflow: hidden;
+      }
     }
 
     /* ── TOGGLE BUTTONS (shared) ── */
@@ -420,17 +425,32 @@
       border-left: 3px solid var(--green);
       border-radius: 6px;
       padding: 1rem 1.25rem;
-      font-size: 0.78rem;
       line-height: 1.6;
       margin-bottom: 2.5rem;
       font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
-      height: auto;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
       white-space: pre-wrap;
       word-break: break-all;
+    }
+    .terminal-desktop {
+      font-size: 0.78rem;
+      height: calc(1.6em * 8 + 2rem);
+      min-height: calc(1.6em * 8 + 2rem);
+    }
+    .terminal-mobile {
+      display: none;
+      font-size: 0.62rem;
+      height: calc(1.6em * 9 + 2rem);
+      min-height: calc(1.6em * 9 + 2rem);
+    }
+    @media (max-width: 600px) {
+      .terminal-desktop { display: none; }
+      .terminal-mobile  { display: flex; }
+      .site-header h1   { font-size: 2rem; }
+      .contact-form .form-row { flex-direction: column; }
     }
     .terminal-widget .tw-prompt { color: var(--green); }
     .terminal-widget .tw-cmd    { color: var(--text); }
@@ -738,10 +758,16 @@
   })();
   </script>
 
-  <!-- TERMINAL -->
-  <div class="terminal-widget fade-in" id="terminal-widget">
+  <!-- TERMINAL desktop -->
+  <div class="terminal-widget terminal-desktop fade-in" id="terminal-widget">
     <div id="tw-lines"></div>
     <div id="tw-active-line"><span class="tw-prompt" id="tw-prompt">matflix@matflix-server:~$&nbsp;</span><span class="tw-cmd" id="tw-cmd"></span><span class="tw-cursor" id="tw-cursor"></span></div>
+  </div>
+
+  <!-- TERMINAL mobile -->
+  <div class="terminal-widget terminal-mobile fade-in" id="terminal-widget-mob">
+    <div id="tw-lines-mob"></div>
+    <div id="tw-active-line-mob"><span class="tw-prompt" id="tw-prompt-mob">matflix@matflix-server:~$&nbsp;</span><span class="tw-cmd" id="tw-cmd-mob"></span><span class="tw-cursor" id="tw-cursor-mob"></span></div>
   </div>
 
   <!-- ABOUT -->
@@ -1190,6 +1216,85 @@ flowchart TD
                       setTimeout(printLine, SPD_LINE);
                     } else {
                       // STEP 4: final prompt, stop cursor
+                      prompt.textContent = 'matflix@matflix-server:~/matflixlab$ ';
+                      setTimeout(function() {
+                        cursor.style.animation = 'none';
+                        cursor.style.opacity   = '0';
+                      }, 3000);
+                    }
+                  }
+                  printLine();
+                }, SPD_ENTER_PAUSE);
+              });
+            }, 300);
+          }, SPD_ENTER_PAUSE);
+        });
+      }, 900);
+    })();
+
+    // ── TERMINAL WIDGET MOBILE ─────────────────────────────────────────────
+    (function() {
+      var lines   = document.getElementById('tw-lines-mob');
+      var prompt  = document.getElementById('tw-prompt-mob');
+      var cmdEl   = document.getElementById('tw-cmd-mob');
+      var cursor  = document.getElementById('tw-cursor-mob');
+      if (!lines || !cmdEl) return;
+
+      var PROMPT1 = 'matflix@matflix-server:~$ ';
+      var PROMPT2 = 'matflix@matflix-server:~$ ';
+
+      var CMD1 = 'mkdir -p matflixlab/{Kubernetes-k3s,Traefik,Cloudflare_Tunnel,containerd,Kustomize,Next.js_15,whisper.cpp,nginx}';
+      var CMD2 = 'cd matflixlab/ && ls';
+
+      var LS_OUTPUT = [
+        'Cloudflare_Tunnel  containerd',
+        'Kubernetes-k3s     Kustomize',
+        'Next.js_15         nginx',
+        'Traefik            whisper.cpp',
+      ];
+
+      var SPD_TYPE = 28;
+      var SPD_ENTER_PAUSE = 400;
+      var SPD_LINE = 60;
+
+      function addLine(text) {
+        var span = document.createElement('span');
+        span.className = 'tw-output';
+        span.textContent = text;
+        lines.appendChild(span);
+      }
+
+      function typeCmd(cmd, done) {
+        var i = 0;
+        function t() {
+          if (i <= cmd.length) {
+            cmdEl.textContent = cmd.slice(0, i);
+            i++;
+            setTimeout(t, SPD_TYPE);
+          } else { done(); }
+        }
+        t();
+      }
+
+      function clearCmd() { cmdEl.textContent = ''; }
+
+      setTimeout(function() {
+        typeCmd(CMD1, function() {
+          setTimeout(function() {
+            addLine(PROMPT1 + CMD1);
+            clearCmd();
+            setTimeout(function() {
+              typeCmd(CMD2, function() {
+                setTimeout(function() {
+                  addLine(PROMPT2 + CMD2);
+                  clearCmd();
+                  var idx = 0;
+                  function printLine() {
+                    if (idx < LS_OUTPUT.length) {
+                      addLine(LS_OUTPUT[idx]);
+                      idx++;
+                      setTimeout(printLine, SPD_LINE);
+                    } else {
                       prompt.textContent = 'matflix@matflix-server:~/matflixlab$ ';
                       setTimeout(function() {
                         cursor.style.animation = 'none';
