@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>matflixlab</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 116'%3E%3Cpolygon points='50,2 98,28 98,88 50,114 2,88 2,28' fill='none' stroke='%236366f1' stroke-width='6'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='monospace' font-size='38' fill='%236366f1'%3E%3E_%3C/text%3E%3C/svg%3E">
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
 
@@ -501,7 +502,12 @@
 
   <!-- STICKY NAVBAR -->
   <nav class="topnav">
-    <a class="topnav-logo" href="#">matflix<span class="hl">lab</span></a>
+    <a class="topnav-logo" href="#">
+      <svg width="22" height="22" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:7px;flex-shrink:0;">
+        <polygon points="50,2 98,28 98,88 50,114 2,88 2,28" fill="none" stroke="#6366f1" stroke-width="6"/>
+        <text x="50" y="68" text-anchor="middle" font-family="'SF Mono','Fira Code',monospace" font-size="38" fill="#6366f1">&gt;_</text>
+      </svg>matflix<span class="hl">lab</span>
+    </a>
     <div class="topnav-links">
       <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
       <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
@@ -583,16 +589,19 @@
       'homelab.arch': 'architecture — network flow',
 
       // SpeakStats
-      'speakstats.desc': 'Speech analysis tool. Upload audio or video, get a transcript via local whisper.cpp inference, and see word frequency and filler word stats. Fully local — no data leaves the server.',
+      'speakstats.desc': 'I never heard "AI" and "agentic AI" as many times as during a recent AWS Summit. I thought about an app to count words from audio &mdash; all the ones I found were paid. So I built this &mdash; upload a recording, get a transcript via whisper.cpp, and see exactly which words you\'re overusing. Fully local &mdash; no data leaves the server.',
       'speakstats.arch': 'architecture',
 
       // Jellyfin
-      'jellyfin.desc': 'Self-hosted media server for movies, TV shows and music. Access restricted to approved users.',
+      'jellyfin.desc': 'I\'m a fan of obscure, old films that never made it to any streaming platform &mdash; the kind you can only find on a dusty DVD or a shady torrent (not recommended). So I built my own streaming service with Jellyfin to share it with my closest friends.',
       'jellyfin.arch': 'architecture',
 
       // Umami
-      'umami.desc':    'Self-hosted, privacy-focused web analytics for matflixlab.pl. Live visitor stats, countries, pages and referrers — public read-only dashboard.',
+      'umami.desc':    'My wife works in marketing and never lets me forget that everything needs to be measured. She\'s right &mdash; you can\'t improve something you don\'t measure. So I added self-hosted analytics to my portfolio &mdash; live visitor stats, countries and more. The full dashboard is public, nothing to hide.',
       'umami.extlink': 'view dashboard &#8599;',
+
+      // Grafana
+      'grafana.desc':  'Full observability stack running in the cluster. Prometheus scrapes metrics from node-exporter, cAdvisor and kube-state-metrics every 30s. Grafana visualises it all &mdash; host CPU &amp; RAM, disk I/O, pod statuses and more. Public read-only access.',
 
       // footer
       'footer.text': 'matflixlab.pl &mdash; running on k3s',
@@ -648,16 +657,19 @@
       'homelab.arch': 'architektura — przepływ sieciowy',
 
       // SpeakStats
-      'speakstats.desc': 'Narzędzie do analizy mowy. Prześlij audio lub wideo, otrzymaj transkrypcję przez lokalny model whisper.cpp i sprawdź statystyki słów oraz wypełniaczy. W pełni lokalne — żadne dane nie opuszczają serwera.',
+      'speakstats.desc': 'Na ostatnim AWS Summit tyle razy usłyszałem "AI" i "agentic AI", że postanowiłem to policzyć. Wszystkie narzędzia do analizy słów z audio były płatne, więc zbudowałem własne &mdash; wgraj nagranie, otrzymaj transkrypcję przez whisper.cpp i sprawdź, które słowa powtarzasz zbyt często. W pełni lokalnie &mdash; żadne dane nie opuszczają serwera.',
       'speakstats.arch': 'architektura',
 
       // Jellyfin
-      'jellyfin.desc': 'Własny serwer mediów do filmów, seriali i muzyki. Dostęp ograniczony do zatwierdzonych użytkowników.',
+      'jellyfin.desc': 'Jestem fanem niszowych, starych filmów, których nie znajdziesz na żadnym streamingu &mdash; tych, które żyją już tylko na zakurzonych DVD lub podejrzanych torrentach (niezalecane). Więc zbudowałem własny serwis streamingowy z Jellyfin, żeby dzielić się nimi z najbliższymi znajomymi.',
       'jellyfin.arch': 'architektura',
 
       // Umami
-      'umami.desc':    'Własne, nastawione na prywatność narzędzie analityczne dla matflixlab.pl. Statystyki odwiedzin, kraje, strony i źródła ruchu — publiczny panel tylko do odczytu.',
+      'umami.desc':    'Moja żona pracuje w marketingu i regularnie mi przypomina, że wszystko trzeba mierzyć. Ma rację &mdash; nie możesz poprawić czegoś, czego nie mierzysz. Więc dodałem własne narzędzie analityczne do portfolio &mdash; statystyki odwiedzin, kraje i więcej. Dashboard jest publiczny, nie mam nic do ukrycia.',
       'umami.extlink': 'otwórz panel &#8599;',
+
+      // Grafana
+      'grafana.desc':  'Pełny stack monitoringu działający w klastrze. Prometheus zbiera metryki z node-exporter, cAdvisor i kube-state-metrics co 30 sekund. Grafana wizualizuje wszystko &mdash; CPU i RAM hosta, I/O dysku, statusy podów i więcej. Publiczny dostęp tylko do odczytu.',
 
       // footer
       'footer.text': 'matflixlab.pl &mdash; działa na k3s',
@@ -1025,6 +1037,30 @@ flowchart TD
             <div class="service-badges">
               <span class="badge">self-hosted</span>
               <span class="badge">PostgreSQL</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Grafana -->
+    <div class="service-card">
+      <a class="service-header" href="https://grafana.matflixlab.pl" target="_blank">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot" title="public view"></span>
+              <span class="service-name">Grafana</span>
+            </div>
+            <span class="ext-link">grafana.matflixlab.pl &#8599;</span>
+            <div class="service-desc" data-i18n="grafana.desc">
+              Self-hosted monitoring dashboards powered by Prometheus. Live cluster metrics —
+              CPU, RAM, disk, network and pod status. Public read-only access.
+            </div>
+            <div class="service-badges">
+              <span class="badge">Prometheus</span>
+              <span class="badge">node-exporter</span>
+              <span class="badge">kube-state-metrics</span>
             </div>
           </div>
         </div>

@@ -10,3 +10,4 @@ resources:
   - apps/landing
   - apps/speakstats
   - apps/jellyfin
+  - apps/monitoring
