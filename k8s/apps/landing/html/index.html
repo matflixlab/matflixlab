@@ -144,6 +144,9 @@
       padding: 0.2rem 0.5rem;
       cursor: pointer;
       line-height: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
     }
     /* mobile drawer */
     .topnav-drawer {
@@ -176,7 +179,7 @@
     @media (max-width: 600px) {
       .topnav-links { display: none; }
       .topnav-controls { display: none; }
-      .topnav-hamburger { display: block; margin-left: auto; }
+      .topnav-hamburger { display: flex; margin-left: auto; }
     }
 
     /* ── PAGE CONTENT ── */
