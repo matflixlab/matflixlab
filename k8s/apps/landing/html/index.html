@@ -486,6 +486,27 @@
     }
     .site-nav a:hover { color: var(--accent2); border-color: var(--accent2); }
 
+    /* ── CLUSTER METRICS ── */
+    .cluster-metrics {
+      margin-bottom: 2.5rem;
+    }
+    .cluster-metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .cluster-metrics-grid iframe {
+      width: 100%;
+      height: 200px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+    @media (max-width: 600px) {
+      .cluster-metrics-grid { grid-template-columns: 1fr; }
+      .cluster-metrics-grid iframe { height: 180px; }
+    }
+
     /* ── FOOTER ── */
     .site-footer {
       border-top: 1px solid var(--border); padding-top: 1.5rem;
@@ -512,6 +533,7 @@
       <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
       <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
       <a href="#services" data-i18n="nav.services">services</a>
+      <a href="#cluster" data-i18n="nav.cluster">cluster</a>
       <a href="#contact" data-i18n="nav.contact">contact</a>
     </div>
     <div class="topnav-controls">
@@ -530,6 +552,7 @@
     <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
     <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
     <a href="#services" data-i18n="nav.services">services</a>
+    <a href="#cluster" data-i18n="nav.cluster">cluster</a>
     <a href="#contact" data-i18n="nav.contact">contact</a>
     <div class="topnav-drawer-controls">
       <button class="lang-toggle" onclick="setLang('en')">EN</button>
@@ -561,12 +584,14 @@
       'label.stats':          'site stats',
       'label.portfolio':      'portfolio',
       'label.homelab-stack':  'homelab-stack',
+      'label.cluster':        'cluster metrics',
       'label.services':       'services',
 
       // nav
       'nav.portfolio':  'portfolio',
       'nav.homelab':    'homelab-stack',
       'nav.services':   'services',
+      'nav.cluster':    'cluster',
       'nav.contact':    'contact',
 
       // about block
@@ -629,12 +654,14 @@
       'label.stats':          'statystyki',
       'label.portfolio':      'portfolio',
       'label.homelab-stack':  'stos technologiczny',
+      'label.cluster':        'metryki klastra',
       'label.services':       'serwisy',
 
       // nav
       'nav.portfolio':  'portfolio',
       'nav.homelab':    'stos technologiczny',
       'nav.services':   'serwisy',
+      'nav.cluster':    'klaster',
       'nav.contact':    'kontakt',
 
       // about block
@@ -970,6 +997,17 @@ flowchart TD
         </div>
         <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
+    </div>
+  </div>
+
+  <!-- CLUSTER METRICS -->
+  <div id="cluster" class="section-label fade-in" data-i18n="label.cluster">cluster metrics</div>
+  <div class="cluster-metrics fade-in">
+    <div class="cluster-metrics-grid">
+      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=77&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=78&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=74&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=152&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
     </div>
   </div>
 
