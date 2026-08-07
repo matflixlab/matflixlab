@@ -62,11 +62,11 @@
       --border:  #1e1e1e;
       --accent:  #6366f1;
       --accent2: #22d3ee;
-      --text:    #e0e0e0;
-      --muted:   #555;
+      --text:    #f0f0f0;
+      --muted:   #888;
       --green:   #4ade80;
       --yellow:  #facc15;
-      --text-secondary: #aaa;
+      --text-secondary: #c0c0c0;
     }
     [data-theme="light"] {
       --bg:      #f5f5f0;
@@ -74,11 +74,11 @@
       --border:  #d4d4cc;
       --accent:  #4f46e5;
       --accent2: #0891b2;
-      --text:    #1a1a1a;
-      --muted:   #888;
+      --text:    #111111;
+      --muted:   #555;
       --green:   #16a34a;
       --yellow:  #ca8a04;
-      --text-secondary: #555;
+      --text-secondary: #333;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; scroll-padding-top: 56px; }
@@ -321,13 +321,16 @@
     details { border-top: 1px solid var(--border); }
     summary {
       list-style: none; padding: 0.75rem 1.5rem; font-size: 0.72rem;
-      color: var(--muted); cursor: pointer; display: flex;
-      align-items: center; gap: 0.5rem; user-select: none; transition: color 0.15s;
+      color: var(--accent2); cursor: pointer; display: flex;
+      align-items: center; gap: 0.5rem; user-select: none; transition: color 0.15s, background 0.15s;
+      letter-spacing: 0.03em;
     }
-    summary:hover { color: var(--accent2); }
+    summary:hover { color: var(--text); background: var(--border); }
     summary::before { content: '▶'; font-size: 0.6rem; transition: transform 0.2s; }
+    summary::after { content: '— click to expand'; font-size: 0.65rem; color: var(--muted); margin-left: auto; }
     details[open] summary::before { transform: rotate(90deg); }
     details[open] summary { color: var(--accent2); }
+    details[open] summary::after { content: '— click to collapse'; }
     .details-diagram {
       padding: 1.5rem; background: var(--bg); border-top: 1px solid var(--border);
       overflow-x: auto; display: flex; justify-content: center;
@@ -533,7 +536,6 @@
       <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
       <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
       <a href="#services" data-i18n="nav.services">services</a>
-      <a href="#cluster" data-i18n="nav.cluster">cluster</a>
       <a href="#contact" data-i18n="nav.contact">contact</a>
     </div>
     <div class="topnav-controls">
@@ -552,7 +554,6 @@
     <a href="#portfolio" data-i18n="nav.portfolio">portfolio</a>
     <a href="#homelab-stack" data-i18n="nav.homelab">homelab-stack</a>
     <a href="#services" data-i18n="nav.services">services</a>
-    <a href="#cluster" data-i18n="nav.cluster">cluster</a>
     <a href="#contact" data-i18n="nav.contact">contact</a>
     <div class="topnav-drawer-controls">
       <button class="lang-toggle" onclick="setLang('en')">EN</button>
@@ -612,6 +613,7 @@
       // homelab stack card
       'homelab.desc': 'Single-node homelab running on a laptop. Built on <strong>k3s</strong> — a lightweight Kubernetes distribution. All services are containerised and managed via <strong>Kustomize</strong> manifests. Exposed to the internet through a <strong>Cloudflare Tunnel</strong> — no open ports, no public IP required. Used as a platform for learning Kubernetes and shipping personal projects.',
       'homelab.arch': 'architecture — network flow',
+      'homelab.metrics': 'cluster metrics — live',
 
       // SpeakStats
       'speakstats.desc': 'I never heard "AI" and "agentic AI" as many times as during a recent AWS Summit. I thought about an app to count words from audio &mdash; all the ones I found were paid. So I built this &mdash; upload a recording, get a transcript via whisper.cpp, and see exactly which words you\'re overusing. Fully local &mdash; no data leaves the server.',
@@ -682,6 +684,7 @@
       // homelab stack card
       'homelab.desc': 'Jednowęzłowy homelab działający na laptopie. Oparty na <strong>k3s</strong> — lekkiej dystrybucji Kubernetesa. Wszystkie serwisy są skonteneryzowane i zarządzane przez manifesty <strong>Kustomize</strong>. Udostępniane przez <strong>Cloudflare Tunnel</strong> — bez otwartych portów, bez publicznego IP. Platforma do nauki Kubernetesa i wdrażania własnych projektów.',
       'homelab.arch': 'architektura — przepływ sieciowy',
+      'homelab.metrics': 'metryki klastra — live',
 
       // SpeakStats
       'speakstats.desc': 'Na ostatnim AWS Summit tyle razy usłyszałem "AI" i "agentic AI", że postanowiłem to policzyć. Wszystkie narzędzia do analizy słów z audio były płatne, więc zbudowałem własne &mdash; wgraj nagranie, otrzymaj transkrypcję przez whisper.cpp i sprawdź, które słowa powtarzasz zbyt często. W pełni lokalnie &mdash; żadne dane nie opuszczają serwera.',
@@ -997,17 +1000,19 @@ flowchart TD
         </div>
         <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
-    </div>
-  </div>
-
-  <!-- CLUSTER METRICS -->
-  <div id="cluster" class="section-label fade-in" data-i18n="label.cluster">cluster metrics</div>
-  <div class="cluster-metrics fade-in">
-    <div class="cluster-metrics-grid">
-      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=77&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
-      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=78&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
-      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=74&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
-      <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=152&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+      <details>
+        <summary data-i18n="homelab.metrics">cluster metrics — live</summary>
+        <div class="details-diagram">
+          <div style="width:100%;padding:1rem 0;">
+            <div class="cluster-metrics-grid">
+              <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=77&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+              <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=78&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+              <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=74&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+              <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=152&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+            </div>
+          </div>
+        </div>
+      </details>
     </div>
   </div>
 
