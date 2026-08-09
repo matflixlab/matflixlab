@@ -596,7 +596,7 @@
       'nav.contact':    'contact',
 
       // about block
-      'about.text': 'A personal homelab running on a <strong>single-node k3s cluster</strong> hosted on an old laptop. Serves as a platform for learning <strong>Kubernetes</strong>, experimenting with <strong>self-hosted applications</strong>, and deploying real projects. All services are containerised, managed via <strong>Kustomize</strong> manifests, and exposed to the internet through a <strong>Cloudflare Tunnel</strong> &mdash; no open ports, no public IP required.',
+      'about.text': 'A personal homelab running on a <strong>single-node k3s cluster</strong> hosted on premises (spare laptop). Serves as a platform for learning <strong>Kubernetes</strong>, experimenting with <strong>self-hosted applications</strong>, and deploying real projects. All services are containerised, managed via <strong>Kustomize</strong> manifests, and exposed to the internet through a <strong>Cloudflare Tunnel</strong> &mdash; no open ports, no public IP required.',
 
       // stats labels
       'stat.visitors':  'unique visitors (30d)',
@@ -613,14 +613,15 @@
       // homelab stack card
       'homelab.desc': 'Single-node homelab running on a laptop. Built on <strong>k3s</strong> — a lightweight Kubernetes distribution. All services are containerised and managed via <strong>Kustomize</strong> manifests. Exposed to the internet through a <strong>Cloudflare Tunnel</strong> — no open ports, no public IP required. Used as a platform for learning Kubernetes and shipping personal projects.',
       'homelab.arch': 'architecture — network flow',
-      'homelab.metrics': 'cluster metrics — live',
+      'homelab.metrics': 'host metrics — live',
+      'homelab.cluster': 'cluster metrics — live',
 
       // SpeakStats
       'speakstats.desc': 'I never heard "AI" and "agentic AI" as many times as during a recent AWS Summit. I thought about an app to count words from audio &mdash; all the ones I found were paid. So I built this &mdash; upload a recording, get a transcript via whisper.cpp, and see exactly which words you\'re overusing. Fully local &mdash; no data leaves the server.',
       'speakstats.arch': 'architecture',
 
       // Jellyfin
-      'jellyfin.desc': 'I\'m a fan of obscure, old films that never made it to any streaming platform &mdash; the kind you can only find on a dusty DVD or a shady torrent (not recommended). So I built my own streaming service with Jellyfin to share it with my closest friends.',
+      'jellyfin.desc': 'Matflix is my home cinema. I\'m a fan of obscure, old films that never made it to any streaming platform &mdash; the kind that live on dusty DVDs and nowhere else. So I built my own streaming service with Jellyfin to watch them anywhere and share them with my closest friends.',
       'jellyfin.arch': 'architecture',
 
       // Umami
@@ -684,14 +685,15 @@
       // homelab stack card
       'homelab.desc': 'Jednowęzłowy homelab działający na laptopie. Oparty na <strong>k3s</strong> — lekkiej dystrybucji Kubernetesa. Wszystkie serwisy są skonteneryzowane i zarządzane przez manifesty <strong>Kustomize</strong>. Udostępniane przez <strong>Cloudflare Tunnel</strong> — bez otwartych portów, bez publicznego IP. Platforma do nauki Kubernetesa i wdrażania własnych projektów.',
       'homelab.arch': 'architektura — przepływ sieciowy',
-      'homelab.metrics': 'metryki klastra — live',
+      'homelab.metrics': 'metryki hosta — live',
+      'homelab.cluster': 'metryki klastra — live',
 
       // SpeakStats
       'speakstats.desc': 'Na ostatnim AWS Summit tyle razy usłyszałem "AI" i "agentic AI", że postanowiłem to policzyć. Wszystkie narzędzia do analizy słów z audio były płatne, więc zbudowałem własne &mdash; wgraj nagranie, otrzymaj transkrypcję przez whisper.cpp i sprawdź, które słowa powtarzasz zbyt często. W pełni lokalnie &mdash; żadne dane nie opuszczają serwera.',
       'speakstats.arch': 'architektura',
 
       // Jellyfin
-      'jellyfin.desc': 'Jestem fanem niszowych, starych filmów, których nie znajdziesz na żadnym streamingu &mdash; tych, które żyją już tylko na zakurzonych DVD lub podejrzanych torrentach (niezalecane). Więc zbudowałem własny serwis streamingowy z Jellyfin, żeby dzielić się nimi z najbliższymi znajomymi.',
+      'jellyfin.desc': 'Matflix to moje domowe kino. Jestem fanem niszowych, starych filmów, których nie znajdziesz na żadnym streamingu &mdash; takich, które żyją już tylko na zakurzonych DVD. Więc zbudowałem własny serwis streamingowy z Jellyfin, żeby oglądać je wszędzie i dzielić się nimi z najbliższymi znajomymi.',
       'jellyfin.arch': 'architektura',
 
       // Umami
@@ -930,7 +932,7 @@
       <span class="skill-tag">MCP / AI tooling</span>
     </div>
     <div class="portfolio-actions">
-      <a class="btn primary" href="/cv/3ys_DevOps_mjochemski.pdf" download data-i18n="portfolio.cv" onclick="if(window.umami) umami.track('cv-download')">&#8659; download cv</a>
+      <a class="btn primary" href="/cv/CV_DevOps-SRE_mjochemski.pdf" download data-i18n="portfolio.cv" onclick="if(window.umami) umami.track('cv-download')">&#8659; download cv</a>
       <a class="btn" href="https://linkedin.com/in/mateusz-jochemski" target="_blank" data-i18n="portfolio.linkedin">linkedin &#8599;</a>
     </div>
   </div>
@@ -1001,7 +1003,7 @@ flowchart TD
         <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
       <details>
-        <summary data-i18n="homelab.metrics">cluster metrics — live</summary>
+        <summary data-i18n="homelab.metrics">host metrics — live</summary>
         <div class="details-diagram">
           <div style="width:100%;padding:1rem 0;">
             <div class="cluster-metrics-grid">
@@ -1009,6 +1011,19 @@ flowchart TD
               <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=78&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
               <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=74&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
               <iframe src="https://grafana.matflixlab.pl/d-solo/rYdddlPWk/node-exporter-full?panelId=152&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+            </div>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary data-i18n="homelab.cluster">cluster metrics — live</summary>
+        <div class="details-diagram">
+          <div style="width:100%;padding:1rem 0;">
+            <div class="cluster-metrics-grid">
+              <iframe src="https://grafana.matflixlab.pl/d-solo/matflixlab-cluster/matflixlab-e28094-cluster-metrics?panelId=1&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+              <iframe src="https://grafana.matflixlab.pl/d-solo/matflixlab-cluster/matflixlab-e28094-cluster-metrics?panelId=2&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+              <iframe src="https://grafana.matflixlab.pl/d-solo/matflixlab-cluster/matflixlab-e28094-cluster-metrics?panelId=3&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
+              <iframe src="https://grafana.matflixlab.pl/d-solo/matflixlab-cluster/matflixlab-e28094-cluster-metrics?panelId=4&theme=dark&refresh=30s&from=now-1h&to=now" frameborder="0"></iframe>
             </div>
           </div>
         </div>
@@ -1022,7 +1037,7 @@ flowchart TD
 
     <!-- SpeakStats -->
     <div class="service-card">
-      <a class="service-header" href="https://speakstats.matflixlab.pl" target="_blank">
+      <a class="service-header" href="https://speakstats.matflixlab.pl">
         <div class="service-header-left">
           <div>
             <div class="service-name-row">
@@ -1046,12 +1061,12 @@ flowchart TD
 
     <!-- Jellyfin -->
     <div class="service-card">
-      <a class="service-header" href="https://jellyfin.matflixlab.pl" target="_blank">
+      <a class="service-header" href="https://jellyfin.matflixlab.pl">
         <div class="service-header-left">
           <div>
             <div class="service-name-row">
-              <span class="status-dot private" title="private — login required"></span>
-              <span class="service-name">Jellyfin</span>
+              <span class="status-dot" title="login required"></span>
+              <span class="service-name">Matflix</span>
             </div>
             <span class="ext-link">jellyfin.matflixlab.pl &#8599;</span>
             <div class="service-desc" data-i18n="jellyfin.desc">
@@ -1065,7 +1080,7 @@ flowchart TD
 
     <!-- Umami -->
     <div class="service-card">
-      <a class="service-header" href="https://umami.matflixlab.pl/share/T4XRFBmnPgMOKIk0" target="_blank">
+      <a class="service-header" href="https://umami.matflixlab.pl/share/T4XRFBmnPgMOKIk0">
         <div class="service-header-left">
           <div>
             <div class="service-name-row">
@@ -1088,7 +1103,7 @@ flowchart TD
 
     <!-- Grafana -->
     <div class="service-card">
-      <a class="service-header" href="https://grafana.matflixlab.pl" target="_blank">
+      <a class="service-header" href="https://grafana.matflixlab.pl">
         <div class="service-header-left">
           <div>
             <div class="service-name-row">
