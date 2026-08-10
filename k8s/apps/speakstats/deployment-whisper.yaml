@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speakstats-whisper
+  namespace: matflixlab
+  labels:
+    app: speakstats-whisper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speakstats-whisper
+  template:
+    metadata:
+      labels:
+        app: speakstats-whisper
+    spec:
+      containers:
+      - name: whisper
+        image: ghcr.io/ggerganov/whisper.cpp:main
+        command: ["/app/build/bin/whisper-server"]
+        args:
+        - "--model"
+        - "/models/ggml-base.bin"
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "8080"
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: models
+          mountPath: /models
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: models
+        hostPath:
+          path: /home/matflix/matflixlab/speakstats/models
+          type: Directory

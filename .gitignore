@@ -13,8 +13,8 @@ cv/
 *.jpg
 *.png
 
-# Speakstats (osobne repo)
-speakstats/
+# Speakstats app code (osobne repo)
+/speakstats/
 
 # Kiro sessions (nie potrzebne w repo)
 .kiro/sessions/
