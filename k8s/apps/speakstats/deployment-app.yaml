@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speakstats
+  namespace: matflixlab
+  labels:
+    app: speakstats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speakstats
+  template:
+    metadata:
+      labels:
+        app: speakstats
+    spec:
+      containers:
+      - name: speakstats
+        image: localhost:30500/speakstats:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: WHISPER_SERVER_URL
+          value: "http://speakstats-whisper:8080"
+        - name: UPLOAD_DIR
+          value: "/app/uploads"
+        - name: MAX_FILE_SIZE_MB
+          value: "100"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: speakstats-uploads-pvc

@@ -32,6 +32,8 @@ spec:
           mountPath: /usr/share/nginx/html
         - name: pdf-dir
           mountPath: /usr/share/nginx/html/cv
+        - name: images-dir
+          mountPath: /usr/share/nginx/html/images
       volumes:
       - name: html
         configMap:
@@ -39,4 +41,8 @@ spec:
       - name: pdf-dir
         hostPath:
           path: /home/matflix/matflixlab/cv
+          type: DirectoryOrCreate
+      - name: images-dir
+        hostPath:
+          path: /home/matflix/matflixlab/images
           type: DirectoryOrCreate

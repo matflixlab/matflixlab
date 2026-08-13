@@ -15,6 +15,7 @@ resources:
   - kube-state-metrics/service.yaml
   - grafana/configmap-datasource.yaml
   - grafana/configmap-ini.yaml
+  - grafana/secret.yaml
   - grafana/pvc.yaml
   - grafana/deployment.yaml
   - grafana/service.yaml

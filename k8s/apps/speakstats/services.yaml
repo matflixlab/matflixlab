@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: speakstats
+  namespace: matflixlab
+spec:
+  selector:
+    app: speakstats
+  ports:
+  - port: 3000
+    targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: speakstats-whisper
+  namespace: matflixlab
+spec:
+  # ClusterIP only - whisper nie jest wystawiony na zewnatrz
+  selector:
+    app: speakstats-whisper
+  ports:
+  - port: 8080
+    targetPort: 8080

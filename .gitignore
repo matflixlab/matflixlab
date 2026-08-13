@@ -21,3 +21,10 @@ cv/
 
 # Kubernetes secrets
 k8s/**/secret.yaml
+k8s/**/secrets.yaml
+
+# Dev/test files
+mermaid-test.html
+k8s/apps/landing/html/index.dev.html
+k8s/apps/landing/html/termynal.css
+k8s/apps/landing/html/termynal.js

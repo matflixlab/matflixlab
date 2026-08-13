@@ -336,7 +336,7 @@
       overflow-x: auto; display: flex; justify-content: center;
     }
     .details-diagram .mermaid { transform: scale(1); transform-origin: top center; margin-bottom: 0; }
-    .details-diagram.scale2 .mermaid { transform: scale(2); transform-origin: top center; margin-bottom: 15%; }
+    .details-diagram.scale2 .mermaid { zoom: 2; }
 
     /* ── PORTFOLIO ── */
     .portfolio-card {
@@ -887,7 +887,7 @@
         fetch('https://umami.matflixlab.pl/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'admin', password: 'umami' })
+          body: JSON.stringify({ username: 'admin', password: 'GcLlCfbDEWKtPCB3eXwclAHbHs2CI1ir' })
         })
           .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
           .then(function(d) {
@@ -969,17 +969,29 @@
       </div>
       <details>
         <summary data-i18n="homelab.arch">architecture — network flow</summary>
-        <div class="details-diagram">
+        <div class="details-diagram scale2">
           <div class="mermaid">
 flowchart TD
     Internet(("Internet"))
     CF["Cloudflare Edge\nDNS + TLS termination\nmatflixlab.pl"]
     TUN["cloudflared\nsystemd service"]
     TR["Traefik\nIngress Controller\nk3s built-in"]
-    LAND["landing\nnginx :80"]
-    SS["speakstats\nNext.js 15 :3000"]
-    WHIS["whisper.cpp\n:8080 internal"]
-    JF["jellyfin\n:8096"]
+
+    subgraph NS_MATFLIXLAB["namespace: matflixlab"]
+        LAND["landing\nnginx :80"]
+        SS["speakstats\nNext.js 15 :3000"]
+        WHIS["whisper.cpp\n:8080 internal"]
+        JF["jellyfin\n:8096"]
+        UMA["umami\n:3000"]
+        UMADB["umami-postgres\n:5432 internal"]
+    end
+
+    subgraph NS_MONITORING["namespace: monitoring"]
+        GR["grafana\n:3000"]
+        PROM["prometheus\n:9090 internal"]
+        NE["node-exporter\n:9100 internal"]
+        KSM["kube-state-metrics\n:8080 internal"]
+    end
 
     Internet -->|HTTPS| CF
     CF -->|QUIC tunnel| TUN
@@ -987,20 +999,26 @@ flowchart TD
     TR -->|matflixlab.pl| LAND
     TR -->|speakstats.*| SS
     TR -->|jellyfin.*| JF
+    TR -->|umami.*| UMA
+    TR -->|grafana.*| GR
     SS -->|ClusterIP| WHIS
+    UMA -->|ClusterIP| UMADB
+    GR -->|ClusterIP| PROM
+    PROM -->|scrape :9100| NE
+    PROM -->|scrape :8080| KSM
 
     classDef cloud   fill:#1a1a2e,stroke:#f97316,color:#f97316
     classDef infra   fill:#0f1923,stroke:#22d3ee,color:#22d3ee
     classDef service fill:#0f1f0f,stroke:#4ade80,color:#4ade80
     classDef intern  fill:#1a1a1a,stroke:#555,color:#888
+    classDef monitor fill:#1a1020,stroke:#a78bfa,color:#a78bfa
 
     class Internet,CF cloud
     class TUN,TR infra
-    class LAND,SS,JF service
-    class WHIS intern
+    class LAND,SS,JF,UMA,GR service
+    class WHIS,UMADB,PROM,NE,KSM intern
           </div>
         </div>
-        <div class="details-diagram-mobile-note">diagram available on desktop</div>
       </details>
       <details>
         <summary data-i18n="homelab.metrics">host metrics — live</summary>

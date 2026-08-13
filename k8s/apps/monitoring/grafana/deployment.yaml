@@ -33,7 +33,10 @@ spec:
               cpu: "300m"
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: "WnjHWj6T=*D6lfSE;k]}G5N$w\\4dH!\"*9-Prydm.>fx]u{Woh?J#gEqMQ>JI8hFd29:i@"
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-secret
+                  key: admin-password
           volumeMounts:
             - name: data
               mountPath: /var/lib/grafana
