@@ -631,6 +631,9 @@
       // Grafana
       'grafana.desc':  'Full observability stack running in the cluster. Prometheus scrapes metrics from node-exporter, cAdvisor and kube-state-metrics every 30s. Grafana visualises it all &mdash; host CPU &amp; RAM, disk I/O, pod statuses and more. Public read-only access.',
 
+      // ArgoCD
+      'argocd.desc':   'Running a Kubernetes cluster comes with a fair share of <code>kubectl</code> fatigue. So I implemented ArgoCD &mdash; now the only deploy command I have to run is <code>git push</code>, and rollback is just <code>git revert</code>. Go and have a look with read-only view, no login required.',
+
       // footer
       'footer.text': 'matflixlab.pl &mdash; running on k3s',
 
@@ -702,6 +705,9 @@
 
       // Grafana
       'grafana.desc':  'Pełny stack monitoringu działający w klastrze. Prometheus zbiera metryki z node-exporter, cAdvisor i kube-state-metrics co 30 sekund. Grafana wizualizuje wszystko &mdash; CPU i RAM hosta, I/O dysku, statusy podów i więcej. Publiczny dostęp tylko do odczytu.',
+
+      // ArgoCD
+      'argocd.desc':   'Praca z Kubernetesem potrafi zmęczyć ciągłym wklepywaniem komend <code>kubectl</code>. Dlatego wdrożyłem ArgoCD &mdash; teraz jedynym poleceniem deploymentu jest <code>git push</code>, a rollback to po prostu <code>git revert</code>. Zajrzyj &mdash; publiczny podgląd, bez logowania.',
 
       // footer
       'footer.text': 'matflixlab.pl &mdash; działa na k3s',
@@ -1137,6 +1143,29 @@ flowchart TD
               <span class="badge">Prometheus</span>
               <span class="badge">node-exporter</span>
               <span class="badge">kube-state-metrics</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ArgoCD -->
+    <div class="service-card">
+      <a class="service-header" href="https://argocd.matflixlab.pl">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot" title="public — guest access"></span>
+              <span class="service-name">ArgoCD</span>
+            </div>
+            <span class="ext-link">argocd.matflixlab.pl &#8599;</span>
+            <div class="service-desc" data-i18n="argocd.desc">
+              Running a Kubernetes cluster comes with a fair share of <code>kubectl</code> fatigue. So I implemented ArgoCD &mdash; now the only deploy command I have to run is <code>git push</code>, and rollback is just <code>git revert</code>. Go and have a look with read-only view, no login required.
+            </div>
+            <div class="service-badges">
+              <span class="badge">GitOps</span>
+              <span class="badge">Kustomize</span>
+              <span class="badge">GitHub</span>
             </div>
           </div>
         </div>
