@@ -52,9 +52,9 @@ data:
                             {**params, 'type': 'country'})
 
         result = {
-            'visitors':  data.get('visitors', {}).get('value', 0),
-            'pageviews': data.get('pageviews', {}).get('value', 0),
-            'visits':    data.get('visits',    {}).get('value', 0),
+            'visitors':  data.get('visitors',  0),
+            'pageviews': data.get('pageviews', 0),
+            'visits':    data.get('visits',    0),
             'countries': len(metrics) if isinstance(metrics, list) else 0,
         }
         resp = jsonify(result)
