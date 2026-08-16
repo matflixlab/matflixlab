@@ -858,10 +858,7 @@
   <!-- UMAMI STATS SCRIPT -->
   <script>
     (function() {
-      var siteId = '93324562-e1ea-478b-9c9e-8fed70384d06';
       var INTERVAL = 30000;
-      var cachedToken = null;
-      var tokenExpiry = 0;
 
       function fmt(n) {
         if (n === undefined || n === null) return '—';
@@ -871,37 +868,14 @@
         var el = document.getElementById(id);
         if (el) el.textContent = val;
       }
-      function fetchStats(token) {
-        var end = Date.now();
-        var start = end - 30 * 24 * 60 * 60 * 1000;
-        var headers = { 'Authorization': 'Bearer ' + token };
-        fetch('https://umami.matflixlab.pl/api/websites/' + siteId + '/stats?startAt=' + start + '&endAt=' + end, { headers: headers })
-          .then(function(r) { if (!r.ok) { cachedToken = null; return Promise.reject(r.status); } return r.json(); })
+      function tick() {
+        fetch('https://umami-proxy.matflixlab.pl/stats')
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
           .then(function(d) {
             set('stat-visitors',  fmt(d.visitors));
             set('stat-pageviews', fmt(d.pageviews));
             set('stat-visits',    fmt(d.visits));
-          })
-          .catch(function() { cachedToken = null; });
-        fetch('https://umami.matflixlab.pl/api/websites/' + siteId + '/metrics?type=country&startAt=' + start + '&endAt=' + end, { headers: headers })
-          .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
-          .then(function(d) { if (Array.isArray(d)) set('stat-countries', d.length); })
-          .catch(function() {});
-      }
-      function tick() {
-        if (cachedToken && Date.now() < tokenExpiry) { fetchStats(cachedToken); return; }
-        fetch('https://umami.matflixlab.pl/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'admin', password: 'GcLlCfbDEWKtPCB3eXwclAHbHs2CI1ir' })
-        })
-          .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
-          .then(function(d) {
-            if (d.token) {
-              cachedToken = d.token;
-              tokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
-              fetchStats(cachedToken);
-            }
+            set('stat-countries', fmt(d.countries));
           })
           .catch(function() {});
       }
