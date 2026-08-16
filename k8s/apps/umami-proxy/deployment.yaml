@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umami-proxy
+  namespace: matflixlab
+  labels:
+    app: umami-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: umami-proxy
+  template:
+    metadata:
+      labels:
+        app: umami-proxy
+    spec:
+      containers:
+        - name: umami-proxy
+          image: python:3.12-alpine
+          command: ["sh", "-c"]
+          args:
+            - |
+              pip install flask requests --quiet && python /app/proxy.py
+          ports:
+            - containerPort: 5000
+          env:
+            - name: UMAMI_URL
+              valueFrom:
+                secretKeyRef:
+                  name: umami-proxy-secret
+                  key: UMAMI_URL
+            - name: UMAMI_USER
+              valueFrom:
+                secretKeyRef:
+                  name: umami-proxy-secret
+                  key: UMAMI_USER
+            - name: UMAMI_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: umami-proxy-secret
+                  key: UMAMI_PASS
+            - name: UMAMI_SITE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: umami-proxy-secret
+                  key: UMAMI_SITE_ID
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: app
+          configMap:
+            name: umami-proxy-app

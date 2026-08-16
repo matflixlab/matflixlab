@@ -10,4 +10,5 @@ resources:
   - apps/landing
   - apps/speakstats
   - apps/jellyfin
+  - apps/umami-proxy
   - apps/monitoring

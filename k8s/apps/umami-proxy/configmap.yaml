@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: umami-proxy-app
+  namespace: matflixlab
+data:
+  proxy.py: |
+    import os, time, requests
+    from flask import Flask, jsonify
+
+    app = Flask(__name__)
+
+    UMAMI_URL  = os.environ['UMAMI_URL']
+    UMAMI_USER = os.environ['UMAMI_USER']
+    UMAMI_PASS = os.environ['UMAMI_PASS']
+    SITE_ID    = os.environ['UMAMI_SITE_ID']
+
+    _token     = None
+    _token_exp = 0
+
+    def get_token():
+        global _token, _token_exp
+        if _token and time.time() < _token_exp:
+            return _token
+        r = requests.post(f'{UMAMI_URL}/api/auth/login',
+                          json={'username': UMAMI_USER, 'password': UMAMI_PASS},
+                          timeout=10)
+        r.raise_for_status()
+        _token     = r.json()['token']
+        _token_exp = time.time() + 23 * 3600
+        return _token
+
+    def umami_get(path, params=None):
+        headers = {'Authorization': f'Bearer {get_token()}'}
+        r = requests.get(f'{UMAMI_URL}{path}', headers=headers,
+                         params=params, timeout=10)
+        r.raise_for_status()
+        return r.json()
+
+    @app.route('/health')
+    def health():
+        return jsonify({'status': 'ok'})
+
+    @app.route('/stats')
+    def stats():
+        end   = int(time.time() * 1000)
+        start = end - 30 * 24 * 60 * 60 * 1000
+        params = {'startAt': start, 'endAt': end}
+
+        data    = umami_get(f'/api/websites/{SITE_ID}/stats',    params)
+        metrics = umami_get(f'/api/websites/{SITE_ID}/metrics',
+                            {**params, 'type': 'country'})
+
+        result = {
+            'visitors':  data.get('visitors', {}).get('value', 0),
+            'pageviews': data.get('pageviews', {}).get('value', 0),
+            'visits':    data.get('visits',    {}).get('value', 0),
+            'countries': len(metrics) if isinstance(metrics, list) else 0,
+        }
+        resp = jsonify(result)
+        resp.headers['Access-Control-Allow-Origin'] = 'https://matflixlab.pl'
+        return resp
+
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=5000)
