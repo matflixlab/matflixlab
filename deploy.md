@@ -248,9 +248,27 @@ Cloudflare Zero Trust → Networks → Tunnels → tunel → Edit → Public Hos
 
 - **Prometheus:** scrape co 30s, retencja 30 dni, PVC 5Gi
 - **Grafana:** https://grafana.matflixlab.pl — anonymous read-only
-- **Dashboardy:** Node Exporter Full (uid: `rYdddlPWk`), Kubernetes Views Pods (uid: `k8s_views_pods`), matflixlab Cluster (uid: `matflixlab-cluster`)
+- **Loki:** agregator logów ze wszystkich namespace'ów, retencja 7 dni, PVC 10Gi
+- **Promtail:** DaemonSet zbierający logi ze wszystkich podów → Loki
+- **Dashboardy:** Node Exporter Full (`rYdddlPWk`), Kubernetes Views Pods (`k8s_views_pods`), matflixlab Cluster (`matflixlab-cluster`), Loki Kubernetes Logs (`o6-BGgnnk`)
 - **node-exporter:** metryki hosta CPU/RAM/disk/network
 - **kube-state-metrics:** metryki podów/deploymentów
+
+### Przykładowe LogQL queries w Grafana Explore → Loki
+
+```logql
+# wszystkie logi z namespace matflixlab
+{namespace="matflixlab"}
+
+# tylko błędy speakstats
+{namespace="matflixlab", app="speakstats"} |= "error"
+
+# logi wszystkich namespace'ów z poziomem error
+{namespace=~".+"} |= "error" | logfmt | level="error"
+
+# logi ArgoCD sync
+{namespace="argocd"} |= "sync"
+```
 
 ---
 
