@@ -5,6 +5,8 @@ configMapGenerator:
   - name: landing-html
     files:
       - html/index.html
+      - html/robots.txt
+      - html/sitemap.xml
     options:
       disableNameSuffixHash: true
 
