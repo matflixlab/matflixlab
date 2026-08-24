@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116">
-  <polygon points="50,2 98,28 98,88 50,114 2,88 2,28" fill="none" stroke="#6366f1" stroke-width="6"/>
-  <text x="50" y="68" text-anchor="middle" font-family="monospace" font-size="38" fill="#6366f1">&gt;_</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 116">
+  <g transform="translate(8 0)">
+    <polygon points="50,2 98,28 98,88 50,114 2,88 2,28" fill="none" stroke="#6366f1" stroke-width="6"/>
+    <text x="50" y="68" text-anchor="middle" font-family="monospace" font-size="38" fill="#6366f1">&gt;_</text>
+  </g>
 </svg>
