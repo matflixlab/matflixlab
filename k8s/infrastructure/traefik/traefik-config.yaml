@@ -17,3 +17,13 @@ spec:
     service:
       type: ClusterIP
     hostNetwork: false
+
+    tracing:
+      otlp:
+        grpc:
+          endpoint: tempo.monitoring.svc.cluster.local:4317
+          insecure: true
+
+    logs:
+      access:
+        enabled: true

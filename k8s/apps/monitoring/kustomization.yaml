@@ -27,3 +27,7 @@ resources:
   - promtail/configmap.yaml
   - promtail/daemonset.yaml
   - promtail/service.yaml
+  - tempo/pvc.yaml
+  - tempo/configmap.yaml
+  - tempo/deployment.yaml
+  - tempo/service.yaml
