@@ -230,9 +230,9 @@ Status: OK / ERROR
 
 ## Status
 
-- [ ] Etap 1 — Tempo manifesty
-- [ ] Etap 2 — Grafana datasource
-- [ ] Etap 3 — Traefik config
-- [ ] Etap 4 — Kustomization
-- [ ] Etap 5 — Deploy i weryfikacja
-- [ ] Etap 6 — Dashboard import
+- [x] Etap 1 — Tempo manifesty
+- [x] Etap 2 — Grafana datasource
+- [x] Etap 3 — Traefik config
+- [x] Etap 4 — Kustomization
+- [x] Etap 5 — Deploy i weryfikacja
+- [x] Etap 6 — Dashboard import (Traefik dashboard uid: `qPdAviJmz`)
