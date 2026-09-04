@@ -9,7 +9,6 @@ data:
     datasources:
       - name: Prometheus
         type: prometheus
-        uid: prometheus
         url: http://prometheus.monitoring.svc.cluster.local:9090
         access: proxy
         isDefault: true
@@ -17,7 +16,6 @@ data:
 
       - name: Loki
         type: loki
-        uid: loki
         url: http://loki.monitoring.svc.cluster.local:3100
         access: proxy
         isDefault: false
@@ -25,21 +23,20 @@ data:
 
       - name: Tempo
         type: tempo
-        uid: tempo
         url: http://tempo.monitoring.svc.cluster.local:3200
         access: proxy
         isDefault: false
         editable: false
         jsonData:
           tracesToLogsV2:
-            datasourceUid: loki
+            datasourceUid: Loki
             filterByTraceID: true
             filterBySpanID: false
           tracesToMetrics:
-            datasourceUid: prometheus
+            datasourceUid: Prometheus
           serviceMap:
-            datasourceUid: prometheus
+            datasourceUid: Prometheus
           nodeGraph:
             enabled: true
           lokiSearch:
-            datasourceUid: loki
+            datasourceUid: Loki
