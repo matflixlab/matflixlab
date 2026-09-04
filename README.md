@@ -101,7 +101,7 @@ matflixlab/
 
 ```
 1. Code change → git push to GitHub
-2. ArgoCD auto-sync (30s poll interval)
+2. ArgoCD auto-sync (3min poll interval)
 3. Kustomize build manifests
 4. kubectl apply to k3s cluster
 5. Traefik routes traffic
@@ -211,7 +211,6 @@ Ingress controller routing external traffic to services.
 **Config:** `k8s/infrastructure/traefik/traefik-config.yaml` (HelmChartConfig)  
 **Features:**
 - HTTP/HTTPS on ports 80/443 (hostPort)
-- Automatic Let's Encrypt TLS (via Cloudflare)
 - OTLP tracing to Tempo
 - Prometheus metrics on `:9100`
 
@@ -238,7 +237,7 @@ User request → Cloudflare CDN → Cloudflare Tunnel → Traefik → Service �
 - **No open ports** on router/firewall
 - **No public IP** required
 - **Cloudflare WAF** protects against DDoS, bots
-- **TLS termination** at Traefik (Let's Encrypt certs)
+- **TLS termination** at Cloudflare (Flexible SSL mode)
 
 ### Authentication
 
@@ -465,7 +464,7 @@ This is a personal homelab project, but open to suggestions and learning from ot
 
 ## License
 
-MIT License — see repo for details.
+This project is open source for educational purposes. No formal license applied.
 
 ---
 
