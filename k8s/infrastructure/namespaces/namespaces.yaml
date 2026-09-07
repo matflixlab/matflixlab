@@ -11,3 +11,10 @@ metadata:
   name: registry
   labels:
     app.kubernetes.io/managed-by: kustomize
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/managed-by: kustomize
