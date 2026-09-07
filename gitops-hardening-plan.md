@@ -335,3 +335,46 @@ For each secret: deleted live Secret → applied SealedSecret → confirmed cont
 **Deviations:** 
 - ApplicationSet CRD installation was unplanned (controller was broken for 24 days)
 - Fixed `exclude` syntax in appset-apps.yaml (boolean not string)
+
+---
+
+### 2026-09-07 - Step 4: Enable Pruning (IN PROGRESS) ⚠️
+
+**Pre-flight backups created:**
+- `/root/backups/all-resources-before-pruning-2026-09-07-1632.yaml` (997KB)
+- `/root/backups/applications-before-pruning-2026-09-07-1632.yaml` (54KB)
+- Previous backups: k3s-db, secrets, sealed-secrets-key
+
+**Orphaned resources check:**
+- matflixlab namespace: old ReplicaSets (DESIRED=0) present but harmless (no argocd labels)
+- monitoring namespace: clean, no orphaned resources
+- All current Applications: Synced
+
+**Pruning pilot test - landing app:**
+1. Created test ConfigMap (`test-prune-proof`) in git → ArgoCD created it ✅
+2. Manually patched Application landing with `prune: true` → ApplicationSet reverted it back to `false`
+3. **KEY FINDING**: ApplicationSet continuously reconciles and overwrites manual Application changes
+4. **SOLUTION**: Must update ApplicationSet itself, not individual Applications
+
+**ApplicationSet update (commit bbc5443):**
+- Changed `apps` ApplicationSet: `prune: false` → `prune: true`
+- This affects ALL 6 apps simultaneously (landing, jellyfin, monitoring, speakstats, umami, umami-proxy)
+- ApplicationSet in git updated, but requires manual apply (not managed by ArgoCD itself)
+- Applied manually: `kubectl apply -f appset-apps.yaml`
+- Application landing now shows `prune: true` ✅
+
+**Current state (INCOMPLETE):**
+- ✅ All Applications have `prune: true` in spec
+- ⚠️ Test ConfigMap `test-prune-proof` still exists after 38+ minutes
+- ⚠️ ArgoCD detected `requiresPruning: true` but hasn't deleted it yet
+- 🔍 NEXT: Monitor reconciliation cycle to confirm pruning actually works
+
+**Infrastructure ApplicationSet:**
+- Still has `prune: false` (intentional - more cautious with infrastructure)
+- Will update after apps pruning is proven working
+
+**Session interrupted:** Context limit approaching, continuation needed.
+
+**Deviations:**
+- Pilot approach changed: instead of per-app rollout, enabled for all 6 apps at once (simpler with ApplicationSet architecture)
+- ApplicationSet required manual kubectl apply (not self-managed by ArgoCD)
