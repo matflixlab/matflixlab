@@ -6,9 +6,12 @@ resources:
   - infrastructure/namespaces/namespaces.yaml
   - infrastructure/registry/deployment.yaml
   - infrastructure/registry/service.yaml
+  - infrastructure/traefik
   # Apps
+  - apps/argocd
   - apps/landing
   - apps/speakstats
   - apps/jellyfin
+  - apps/umami
   - apps/umami-proxy
   - apps/monitoring

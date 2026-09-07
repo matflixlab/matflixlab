@@ -4,6 +4,7 @@ metadata:
   name: traefik
   namespace: kube-system
 spec:
+  failurePolicy: reinstall
   valuesContent: |-
     ports:
       web:
