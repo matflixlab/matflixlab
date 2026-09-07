@@ -438,6 +438,45 @@ For each secret: deleted live Secret → applied SealedSecret → confirmed cont
 
 ---
 
+### 2026-09-08 - Step 6: Bootstrap Application verification and GitOps reconciliation test ✅
+
+**Context:** The Step 6 addendum identified that Step 3's ApplicationSet migration left a gap: the `k8s/apps/argocd/` directory (containing ApplicationSet definitions, ArgoCD ingress, and ArgoCD install manifest) was not being reconciled by any ArgoCD Application, requiring manual `kubectl apply`.
+
+**Fix applied:** Commit 5fabea5 added `k8s/apps/argocd/bootstrap-application.yaml` — a self-referencing Application that manages its own directory.
+
+**Verification executed:**
+1. **Git pull:** Pulled commit 5fabea5 successfully
+2. **Current state verification:** `kubectl get application -n argocd` confirmed no `argocd` Application existed (gap confirmed)
+3. **Bootstrap application:** Applied `kubectl apply -f k8s/apps/argocd/bootstrap-application.yaml` (one-time manual step)
+4. **Sync confirmation:** `argocd` Application showed `Synced` status within minutes
+5. **GitOps reconciliation test:**
+   - Added label `test-gitops: "true"` to ArgoCD ingress manifest
+   - Committed and pushed (30c8153)
+   - ArgoCD automatically detected change and synced within ~4 minutes
+   - Verified label applied: `kubectl get ingress argocd -n argocd --show-labels` showed `test-gitops=true`
+6. **Reversion test:**
+   - Reverted the label change (commit 0584e20)
+   - Pushed to git
+   - ArgoCD automatically removed the label within ~1 minute
+   - Verified label removed: `kubectl get ingress argocd -n argocd --show-labels` showed no labels
+
+**Result:** 
+- ✅ `argocd` Application now manages `k8s/apps/argocd/` directory via GitOps
+- ✅ Changes flow through git commits without manual `kubectl apply`
+- ✅ Both additions and deletions/reverts work correctly
+- ✅ All 3 verification steps from the addendum completed successfully
+
+**Final state:** Every directory in the repository is now managed by ArgoCD:
+- `k8s/apps/*` (excluding argocd) → `apps` ApplicationSet
+- `k8s/infrastructure/*` → `infrastructure` ApplicationSet  
+- `k8s/apps/argocd/` → `argocd` Application (self-referencing bootstrap)
+
+**Cleanup:** Removed backup file `k8s/apps/argocd/ingress.yaml.backup`
+
+**Deviations:** None — verification executed exactly as specified in Step 6 addendum.
+
+---
+
 ### 2026-09-08 - Step 6 (addendum): Close the ApplicationSet self-management gap
 
 **Found during review of Steps 1–5:** the Step 3 migration deleted the old
