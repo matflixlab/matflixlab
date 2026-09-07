@@ -236,3 +236,22 @@ Status: OK / ERROR
 - [x] Etap 4 — Kustomization
 - [x] Etap 5 — Deploy i weryfikacja
 - [x] Etap 6 — Dashboard import (Traefik dashboard uid: `qPdAviJmz`)
+- [x] **Fix: CrashLoopBackOff resolved (2026-09-07)** — increased probe delays and memory limits
+
+## Troubleshooting Notes (2026-09-07)
+
+**Problem:** Tempo had 2361 restarts over 9 days (restart every ~5.5 minutes), CrashLoopBackOff
+
+**Root Cause:** 
+1. Compaction on startup took longer than livenessProbe initialDelay (60s)
+2. OOMKilled - 256Mi memory was insufficient for compaction
+3. Aggressive probe settings caused premature restarts
+
+**Solution:**
+- Increased livenessProbe initialDelay: 60s → 120s
+- Increased readinessProbe initialDelay: 30s → 45s  
+- Added explicit timeouts (5s) and failureThresholds (3/5)
+- Increased memory: 128Mi/256Mi → 256Mi/512Mi
+- Increased CPU: 50m/200m → 100m/500m
+
+**Result:** Pod stable, no restarts after 4+ minutes (previously restarted every ~5.5min)
