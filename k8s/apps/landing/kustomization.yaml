@@ -12,7 +12,6 @@ configMapGenerator:
       disableNameSuffixHash: true
 
 resources:
-  - test-configmap.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
