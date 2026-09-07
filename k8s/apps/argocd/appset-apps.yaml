@@ -12,7 +12,8 @@ spec:
         revision: master
         directories:
           - path: k8s/apps/*
-            exclude: k8s/apps/argocd
+          - path: k8s/apps/argocd
+            exclude: true
   template:
     metadata:
       name: '{{.path.basename}}'
