@@ -206,3 +206,31 @@ app=landing` shows a new pod age) with no manual `kubectl rollout restart`.
 
 <!-- Agent: append a dated entry here after each step — what was verified against
      live state, what was done, anything that deviated from this plan and why. -->
+
+### 2026-09-07 - Step 1: Consolidate namespace management ✅
+
+**Verified:**
+- Initial state: `monitoring` namespace defined in `apps/monitoring/namespace.yaml`, `matflixlab` and `registry` in `infrastructure/namespaces/namespaces.yaml`
+- Live namespaces: all three existed in cluster, only `matflixlab` and `registry` had `managed-by: kustomize` label
+- ArgoCD status: single Application `matflixlab` with `prune: false`, `selfHeal: true`
+
+**Actions taken:**
+1. Created full backups in `/root/backups/`:
+   - k3s database: `k3s-db-2026-09-07.tar.gz`
+   - All secrets: `secrets-2026-09-07.yaml`
+   - All resources: `all-resources-2026-09-07.yaml`
+2. Cleaned git state: committed `.gitignore` whitespace, removed obsolete `k8s/resume.md`
+3. Added `monitoring` namespace definition to `infrastructure/namespaces/namespaces.yaml`
+4. Removed `apps/monitoring/namespace.yaml`
+5. Updated `apps/monitoring/kustomization.yaml` to remove `namespace.yaml` reference
+6. Committed as `7657c2f` and pushed to master
+7. ArgoCD auto-synced within 3 minutes
+
+**Result:**
+- ✅ All three namespaces now managed from single file: `infrastructure/namespaces/namespaces.yaml`
+- ✅ All three namespaces have `app.kubernetes.io/managed-by: kustomize` label
+- ✅ ArgoCD status: `Synced` (health: `Progressing` due to pre-existing Tempo CrashLoopBackOff, unrelated to this change)
+- ✅ No downtime - namespace already existed, only labels updated
+- ✅ `argocd` namespace remains outside per plan (bootstrap exception)
+
+**Deviations:** None. Plan executed exactly as specified.
