@@ -234,3 +234,45 @@ app=landing` shows a new pod age) with no manual `kubectl rollout restart`.
 - ✅ `argocd` namespace remains outside per plan (bootstrap exception)
 
 **Deviations:** None. Plan executed exactly as specified.
+
+---
+
+### 2026-09-07 - Step 2: Sealed Secrets ✅
+
+**Bootstrap (one-time):**
+1. Installed Bitnami Sealed Secrets v0.38.4 controller in `kube-system`
+2. **CRITICAL**: Backed up sealing key to `/root/backups/sealed-secrets-key-2026-09-07.yaml`
+3. Installed `kubeseal` CLI v0.38.4
+
+**Secrets converted (3/3 application secrets):**
+1. **umami-proxy-secret** (matflixlab): 4 keys - UMAMI credentials
+   - Created `k8s/apps/umami-proxy/sealed-secret.yaml`
+   - Updated `kustomization.yaml` to reference sealed-secret
+   - Verified: controller unsealed successfully, pod Running
+   
+2. **umami-secret** (matflixlab): 3 keys - Postgres DATABASE_URL, passwords
+   - Created `k8s/apps/umami/sealed-secret.yaml`
+   - Updated `kustomization.yaml`: `secret.yaml` → `sealed-secret.yaml`
+   - Verified: unsealed successfully, umami + postgres pods Running
+   
+3. **grafana-secret** (monitoring): 1 key - admin password
+   - Created `k8s/apps/monitoring/grafana/sealed-secret.yaml`
+   - Updated `kustomization.yaml` to include grafana/sealed-secret.yaml
+   - Verified: unsealed successfully, Grafana pod Running
+
+**ArgoCD secrets (left as bootstrap exception per plan):**
+- `matflixlab-repo` (SSH deploy key) - NOT converted
+- `argocd-*` internal secrets - NOT converted
+- Rationale: Bootstrap secrets required before ArgoCD can reconcile; converting these creates circular dependency
+
+**Result:**
+- ✅ All 3 application secrets now in git as SealedSecrets
+- ✅ Plaintext `secret.yaml` files remain on disk (gitignored) for reference
+- ✅ `.gitignore` rules prevent accidental plaintext secret commits
+- ✅ Controller unsealing working: all pods Running, zero downtime
+- ✅ Sealing key backed up to `/root/backups/` (CRITICAL - don't lose this!)
+
+**Verification method used:**
+For each secret: deleted live Secret → applied SealedSecret → confirmed controller recreated identical Secret → verified pod still Running
+
+**Deviations:** None. ArgoCD secrets intentionally skipped as documented bootstrap exception.
