@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: umami
+      annotations:
+        reloader.stakater.com/auto: "true"
     spec:
       containers:
       - name: umami
