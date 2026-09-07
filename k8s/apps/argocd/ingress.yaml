@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: argocd
   namespace: argocd
+  labels:
+    test-gitops: "true"
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
     traefik.ingress.kubernetes.io/router.middlewares: ""
