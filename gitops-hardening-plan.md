@@ -438,6 +438,56 @@ For each secret: deleted live Secret → applied SealedSecret → confirmed cont
 
 ---
 
+### 2026-09-08 - Step 6 (addendum): Close the ApplicationSet self-management gap
+
+**Found during review of Steps 1–5:** the Step 3 migration deleted the old
+monolithic root `Application` ("no longer needed") once the two ApplicationSets
+took over reconciling `k8s/apps/*` and `k8s/infrastructure/*`. But nothing
+replaced its other job — applying `k8s/apps/argocd/` itself, which holds both
+ApplicationSet definitions, the ArgoCD ingress, and the ArgoCD install manifest.
+Step 4's own log admits this in passing ("ApplicationSet in git updated, but
+requires manual apply... Applied manually: `kubectl apply -f appset-apps.yaml`")
+without flagging it as a gap. Root `k8s/kustomization.yaml` also silently stopped
+being a live reconciliation path at that point — ArgoCD now builds each
+subdirectory individually via the ApplicationSet generators, not this file.
+
+**Fix applied:**
+- Added `k8s/apps/argocd/bootstrap-application.yaml` — a self-referencing
+  `Application` whose `source.path` is `k8s/apps/argocd`, so ArgoCD reconciles its
+  own ApplicationSets/ingress/install manifest (and this Application resource
+  itself) from git going forward.
+- Added it to `k8s/apps/argocd/kustomization.yaml`'s resource list.
+- Annotated root `k8s/kustomization.yaml` with a note that it's now a local
+  validation/reference file only (`kustomize build k8s`), not a live ArgoCD
+  reconciliation path — kept for that purpose rather than deleted.
+
+**Remaining one-time manual step (documented exception, same category as
+installing ArgoCD/sealed-secrets/Reloader):**
+```
+kubectl apply -f k8s/apps/argocd/bootstrap-application.yaml
+```
+After this single apply, any future change to the ApplicationSets, the ArgoCD
+ingress, or ArgoCD's own install manifest flows through a normal git commit —
+closing the last manual-`kubectl` island this plan left behind.
+
+**Note (pre-existing, not introduced by this fix):** `apps/argocd/kustomization.yaml`
+pulls ArgoCD's install manifest from the `stable` tag on GitHub, and this
+Application has `selfHeal: true`. That means ArgoCD will auto-apply its own
+upstream upgrades whenever `stable` moves, on the normal sync interval — this
+was already true under the old root Application and isn't a new risk from this
+change, but worth knowing since it's now more clearly "GitOps-managed" than
+before. Pinning to a specific ArgoCD version tag instead of `stable` would be a
+reasonable follow-up if unattended self-upgrades are unwanted.
+
+**Verification still needed on the host (not yet run — do this before considering
+Step 6 complete):**
+1. `kubectl apply -f k8s/apps/argocd/bootstrap-application.yaml`
+2. Confirm `kubectl get application argocd -n argocd` shows `Synced`/`Healthy`
+3. Make a trivial change inside `k8s/apps/argocd/` (e.g. a label on the ingress),
+   commit, and confirm it lands without any further manual `kubectl apply`
+
+---
+
 ## 🎉 GITOPS HARDENING PLAN — COMPLETE
 
 **All 5 steps executed successfully:**

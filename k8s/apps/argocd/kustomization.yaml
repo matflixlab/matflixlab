@@ -8,3 +8,4 @@ resources:
   - ingress.yaml
   - appset-apps.yaml
   - appset-infrastructure.yaml
+  - bootstrap-application.yaml

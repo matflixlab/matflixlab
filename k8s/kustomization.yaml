@@ -1,6 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# NOTE: since the Step 3 ApplicationSet migration, ArgoCD no longer applies this
+# file directly — each directory listed below is reconciled individually by the
+# `apps`/`infrastructure` ApplicationSets (see k8s/apps/argocd/appset-*.yaml).
+# This file is kept as a single point of local validation/reference
+# (`kustomize build k8s`) and must be kept in sync by hand when apps are added.
+
 resources:
   # Infrastructure
   - infrastructure/namespaces/namespaces.yaml
