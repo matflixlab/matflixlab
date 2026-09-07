@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: test-proof
-  namespace: matflixlab
-data:
-  message: "ApplicationSet proof test - auto-discovered!"
