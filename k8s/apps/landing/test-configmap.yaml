@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-prune-proof
+  namespace: matflixlab
+data:
+  test: "This ConfigMap should be auto-deleted when removed from git"
