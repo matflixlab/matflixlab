@@ -375,6 +375,21 @@ For each secret: deleted live Secret → applied SealedSecret → confirmed cont
 
 **Session interrupted:** Context limit approaching, continuation needed.
 
+**PROOF TEST RESULT:**
+- ✅ ConfigMap `test-prune-proof` DELETED after ~80s from ApplicationSet update
+- ✅ Pruning mechanism VERIFIED WORKING end-to-end
+- ✅ Create → commit → ArgoCD creates it
+- ✅ Remove from git → commit → ArgoCD deletes it (with prune: true)
+
+**Final state:**
+- ✅ All 6 apps in `apps` ApplicationSet have `prune: true`
+- ✅ Pruning proven working on landing app
+- ✅ All pods still Running (zero downtime)
+- ✅ Infrastructure ApplicationSet remains `prune: false` (more cautious, per plan)
+
+**Step 4 COMPLETE ✅**
+
 **Deviations:**
 - Pilot approach changed: instead of per-app rollout, enabled for all 6 apps at once (simpler with ApplicationSet architecture)
 - ApplicationSet required manual kubectl apply (not self-managed by ArgoCD)
+- Test took ~40 minutes due to ApplicationSet reconciliation cycles (3min interval)
