@@ -74,10 +74,10 @@ sudo kubectl get application matflixlab -n argocd
 
 ---
 
-## Landing page — szczególny przypadek
+## Landing page — deploy
 
 Landing page jest serwowany przez nginx z **ConfigMap** generowanego z `html/index.html`.
-ArgoCD aktualizuje ConfigMap ale **pod trzeba zrestartować ręcznie** żeby nginx załadował nową wersję.
+**Reloader** automatycznie wykrywa zmiany w ConfigMap i restartuje pod — zero manual intervention.
 
 ### Deploy landing page
 
@@ -93,14 +93,8 @@ git add k8s/apps/landing/html/index.html
 git commit -m "landing: opis zmiany"
 git push
 
-# 3. wymuś sync ArgoCD
-sudo kubectl patch application matflixlab -n argocd \
-  --type merge \
-  -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"normal"}}}'
-
-# 4. restart poda (wymagany)
-sudo kubectl rollout restart deployment/landing -n matflixlab
-sudo kubectl rollout status deployment/landing -n matflixlab
+# 3. ArgoCD synchronizuje ConfigMap (~3 min)
+# 4. Reloader wykrywa zmianę i restartuje pod automatycznie
 ```
 
 ### Dev preview na localhost
@@ -241,6 +235,50 @@ Cloudflare Zero Trust → Networks → Tunnels → tunel → Edit → Public Hos
 - Domain: `matflixlab.pl`
 - Service Type: `HTTP`
 - URL: `localhost:80`
+
+---
+
+## Reloader — automatyczne restarty podów
+
+**Stakater Reloader** automatycznie wykrywa zmiany w ConfigMap/Secret i restartuje pody które ich używają.
+
+### Zainstalowane deploymenty z Reloader
+
+| Deployment | Namespace | Monitoruje |
+|---|---|---|
+| landing | matflixlab | ConfigMap: `landing-html` |
+| grafana | monitoring | ConfigMap: `grafana-datasources`, `grafana-ini` |
+| umami | matflixlab | Secret: `umami-secret` |
+
+### Weryfikacja działania
+
+```bash
+# sprawdź czy Reloader działa
+sudo kubectl get deployment reloader-reloader -n default
+
+# sprawdź logi Reloader (jeśli trzeba debug)
+sudo kubectl logs deployment/reloader-reloader -n default --tail=50
+
+# sprawdź annotację na deploymencie
+sudo kubectl get deployment landing -n matflixlab -o jsonpath='{.spec.template.metadata.annotations}'
+# oczekiwane: reloader.stakater.com/auto: "true"
+```
+
+### Jak działa
+
+```
+1. zmiana w git → ConfigMap/Secret
+    │
+2. ArgoCD synchronizuje (~3 min)
+    │
+3. Reloader wykrywa zmianę (monitoring co 60s)
+    │
+4. Rolling restart deployment (zero downtime)
+    │
+5. Pod startuje z nową konfiguracją
+```
+
+**Zero manual intervention** — deployment powinien mieć annotację `reloader.stakater.com/auto: "true"`.
 
 ---
 

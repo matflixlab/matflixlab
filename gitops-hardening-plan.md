@@ -393,3 +393,85 @@ For each secret: deleted live Secret → applied SealedSecret → confirmed cont
 - Pilot approach changed: instead of per-app rollout, enabled for all 6 apps at once (simpler with ApplicationSet architecture)
 - ApplicationSet required manual kubectl apply (not self-managed by ArgoCD)
 - Test took ~40 minutes due to ApplicationSet reconciliation cycles (3min interval)
+
+---
+
+### 2026-09-07 - Step 5: Reloader (COMPLETE) ✅
+
+**Reloader installation:**
+- Version: v1.4.21 (latest as of 2026-09-07)
+- Bootstrap method: one-time kubectl apply from GitHub manifest
+- Installed in: `default` namespace
+- Controller pod: `reloader-reloader-666979679-cm9xs` Running ✅
+
+**Deployments with Reloader annotation added:**
+1. `landing` (matflixlab) — monitors ConfigMap `landing-html`
+2. `grafana` (monitoring) — monitors ConfigMap `grafana-datasources` + `grafana-ini`
+3. `umami` (matflixlab) — monitors Secret `umami-secret`
+
+**Test proof (landing ConfigMap):**
+1. Modified `k8s/apps/landing/html/index.html` (added "Auto-reload test" to meta description)
+2. Committed and pushed to git (commit 59bdff6)
+3. ArgoCD synchronized ConfigMap (~3 minutes)
+4. **Reloader detected change and auto-restarted pod** ✅
+   - Old pod: `landing-55c99c5666-ksrxc` (startTime: 15:30:58)
+   - New pod: `landing-6d9b7b554b-7q6sn` (startTime: 15:33:33)
+   - **~3 minutes from commit to automatic pod restart**
+   - **Zero manual intervention required**
+
+**Documentation updates:**
+- Updated `deploy.md` — removed manual `kubectl rollout restart` instructions
+- Added Reloader section in `deploy.md` with verification commands
+- Updated landing page deploy workflow (removed step 4 manual restart)
+
+**Final state:**
+- ✅ Reloader controller Running
+- ✅ 3 deployments annotated and monitored
+- ✅ Automatic pod restart verified working end-to-end
+- ✅ Documentation updated
+- ✅ Zero downtime during entire Step 5
+
+**Step 5 COMPLETE ✅**
+
+**Deviations:**
+- None — executed exactly per plan
+
+---
+
+## 🎉 GITOPS HARDENING PLAN — COMPLETE
+
+**All 5 steps executed successfully:**
+- ✅ Step 1: Namespace consolidation
+- ✅ Step 2: Sealed Secrets (3 secrets encrypted, key backed up)
+- ✅ Step 3: ApplicationSet (9 Applications from 2 ApplicationSets)
+- ✅ Step 4: Pruning enabled (verified working with test ConfigMap)
+- ✅ Step 5: Reloader (automatic pod restarts on ConfigMap/Secret changes)
+
+**Final state:**
+- All deployments flow through git (GitOps ✅)
+- All app secrets encrypted (SealedSecrets ✅)
+- Automatic discovery and adoption of new apps (ApplicationSet ✅)
+- Automatic cleanup of deleted resources (pruning ✅)
+- Automatic pod restarts on config changes (Reloader ✅)
+- **Zero downtime throughout entire implementation**
+
+**Cluster status:**
+- 9 Applications: all Synced, all Healthy
+- 7 pods in matflixlab: all Running
+- 7 pods in monitoring: all Running
+- Reloader controller: Running
+
+**Backups created:**
+- `/root/backups/sealed-secrets-key-2026-09-07.yaml` (CRITICAL - encrypted secrets depend on this!)
+- `/root/backups/secrets-2026-09-07.yaml`
+- `/root/backups/k3s-db-2026-09-07.tar.gz`
+- `/root/backups/all-resources-before-pruning-2026-09-07-1632.yaml`
+- `/root/backups/applications-before-pruning-2026-09-07-1632.yaml`
+
+**Operational improvements:**
+- Before: manual kubectl apply, manual secret management, manual pod restarts
+- After: `git push` → ArgoCD sync → Reloader restart (fully automated)
+- Deploy time: ~3 minutes (ArgoCD sync interval)
+- Rollback: `git revert` + ArgoCD sync
+
+---
