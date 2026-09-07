@@ -276,3 +276,62 @@ app=landing` shows a new pod age) with no manual `kubectl rollout restart`.
 For each secret: deleted live Secret → applied SealedSecret → confirmed controller recreated identical Secret → verified pod still Running
 
 **Deviations:** None. ArgoCD secrets intentionally skipped as documented bootstrap exception.
+
+---
+
+### 2026-09-07 - Step 3: ApplicationSet (App-of-Apps) ✅
+
+**Pre-requisites fixed:**
+1. ApplicationSet CRD was missing (controller in CrashLoopBackOff for 24 days)
+2. Installed ApplicationSet CRD from stable ArgoCD manifest
+3. Controller recovered, now Running and healthy
+
+**Infrastructure changes:**
+1. Created `infrastructure/traefik/kustomization.yaml` (was missing)
+2. Added `failurePolicy: reinstall` to traefik HelmChartConfig for completeness
+3. Updated root `k8s/kustomization.yaml`:
+   - Added `apps/argocd` (contains ApplicationSets)
+   - Added `apps/umami` (previously hand-applied)
+   - Added `infrastructure/traefik` (previously hand-applied)
+
+**ApplicationSets created:**
+1. **apps ApplicationSet**:
+   - Auto-discovers `k8s/apps/*` directories (excluding argocd itself)
+   - Generated 6 Applications: jellyfin, landing, monitoring, speakstats, umami, umami-proxy
+   - All deployed to `matflixlab` namespace
+   - `prune: false`, `selfHeal: true`
+
+2. **infrastructure ApplicationSet**:
+   - Manages `k8s/infrastructure/*` directories
+   - Generated 3 Applications: infra-namespaces, infra-registry, infra-traefik
+   - Smart namespace routing (traefik → kube-system, others → matflixlab)
+   - `prune: false`, `selfHeal: true`
+
+**Adoption verification:**
+- umami: kubectl diff showed no drift (git == live)
+- traefik: added missing failurePolicy, otherwise identical
+- All Applications synced successfully with zero downtime
+
+**Proof test:**
+- Created `k8s/apps/test-app/` directory with simple ConfigMap
+- ApplicationSet auto-discovered it within 45s
+- Application created automatically: `test-app` (Synced/Healthy)
+- ConfigMap deployed successfully
+- Removed test-app directory from git
+- ✅ Proof successful: ApplicationSet works end-to-end
+
+**Cleanup:**
+- Deleted old monolithic `matflixlab` Application
+- Removed `k8s/apps/argocd/application.yaml` from git (no longer needed)
+
+**Result:**
+- ✅ 9 Applications now managed by 2 ApplicationSets (down from 1 monolithic app)
+- ✅ All 9 apps: `Synced` status
+- ✅ All pods Running: matflixlab (7), monitoring (7), kube-system (traefik)
+- ✅ Zero downtime during migration
+- ✅ Adding new app = create directory + commit → auto-discovered
+- ✅ umami and traefik now fully GitOps (previously hand-applied)
+
+**Deviations:** 
+- ApplicationSet CRD installation was unplanned (controller was broken for 24 days)
+- Fixed `exclude` syntax in appset-apps.yaml (boolean not string)
