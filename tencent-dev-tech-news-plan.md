@@ -517,3 +517,52 @@ now, worth revisiting (single shared semaphore) if 2 still isn't safe enough.
 real-world resource constraint on the chosen instance size, not a plan
 error, though `SA2.MEDIUM4` (2 vCPU/4GB) is clearly closer to the edge for
 this workload than hoped.
+
+---
+
+### 2026-09-08 - Step 3 complete: first real run succeeded, plus two more findings ✅
+
+With the concurrency fix pulled and rebuilt, the real (unflagged) pipeline
+completed successfully — monitored end-to-end via a load/memory watcher this
+time rather than found out about problems after the fact. **103 articles
+published**, 96 real LLM calls (~293K tokens), zero rejected raw pages,
+dedup working correctly, `site/index.html` + `processed_urls.json` both
+written. `curl localhost` on the VM returns `200` with real content
+(previously `403` — empty site before any successful run). Step 3's actual
+acceptance criterion (a full real run, not just a flagged test) is met.
+
+**Two more operational findings from this run, both fixed:**
+
+1. **Dynamic home IP locked us out.** `allowed_ssh_cidr` was still pointed
+   at the IP set during initial provisioning; the ISP rotated it, and SSH
+   became unreachable — easily mistaken for another VM crash, but the VM
+   itself was fine (confirmed once back in: `uptime` showed a clean 8-minute
+   idle boot). Fixed by updating `terraform.tfvars` and re-applying. Mateusz
+   asked to open SSH to `0.0.0.0/0` to avoid repeating this — declined (the
+   Terraform validation rule exists specifically to block that, and a public
+   SSH port gets brute-forced constantly regardless of key-only auth being
+   safe against actual compromise). Agreed instead to consider **Tailscale**
+   as the permanent fix (removes the dependency on any public IP for access
+   entirely) as a follow-up, not yet implemented.
+2. **A duplicate container was running concurrently**, doubling load and
+   risking corrupt writes to the shared `processed_urls.json`/`site/`. Root
+   cause: an earlier attempt was killed via a local `timeout 15` wrapper on
+   the *SSH client*, but the remote `docker compose run` process survived
+   the disconnect and kept running server-side. Caught via `docker ps -a`
+   creation timestamps (two containers ~40s apart) and killed the stray one.
+   Process lesson: a local `timeout` on an SSH command does not reliably
+   kill the remote process it invoked — don't assume it does.
+
+**DNS/TLS status:** `news.matflixlab.pl` DNS record already existed
+(proxied through Cloudflare), but requests were returning `502` — Cloudflare
+was almost certainly set to Full/Full(strict) SSL mode, trying HTTPS to an
+origin that only had port 80. Added an nginx TLS listener on 443
+(`deploy/nginx/nginx.conf` + `docker-compose.yml`) using a Cloudflare Origin
+Certificate — Mateusz creating the cert/key directly on the VM himself, same
+convention as `.env`. **Not yet verified end-to-end** (waiting on the
+certificate being placed) — do that next, then re-test
+`curl https://news.matflixlab.pl/`.
+
+**Deviations:** SSH access hardening (Tailscale) and Step 8/9 (push-to-deploy
+runner) both still pending — this entry only closes out Step 3 and the
+immediate DNS/TLS troubleshooting, not the whole plan.
