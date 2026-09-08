@@ -404,3 +404,60 @@ haven't happened yet — this step only covers local implementation/testing.
 
 **Deviations:** none from the revised (no-PDF, inline-content) design agreed
 before implementation.
+
+---
+
+### 2026-09-08 - Step 1: Containerized and verified locally ✅
+
+Added `Dockerfile`, `.dockerignore`, and `docker-compose.yml` to
+`dev-tech-news` (still on `feature/html-news-site`).
+
+**Non-obvious things this needed:**
+- `crawl4ai-setup` (the documented post-install step) is just
+  `playwright install --with-deps --force chromium` plus creating
+  `~/.crawl4ai/` — confirmed by reading `crawl4ai/install.py` rather than
+  guessing, since running it manually on the dev workstation earlier had
+  needed `sudo` (it detects non-root and elevates). Running it as root
+  *during the build* (Docker's default) sidesteps that entirely.
+- **Root-install / non-root-run mismatch:** installing the browser as root
+  then dropping to a non-root `appuser` for runtime would normally leave
+  Playwright looking in the wrong `$HOME/.cache` and not finding the
+  browser it just installed. Fixed with `ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`
+  set *before* the install — a fixed path independent of whichever user is
+  active, chowned to `appuser` afterward.
+- `ENV UV_NO_SYNC=1` after switching to the runtime user — without it, every
+  `uv run` re-verifies the project sync (harmless here, ~20ms, but means a
+  production container could attempt network dependency resolution at
+  runtime for no reason; dependencies are already frozen at build time).
+- Local Docker context gotcha (specific to this dev workstation, not the
+  Tencent VM): `docker compose build` initially failed with "Cannot connect
+  to the Docker daemon" — the active context (`desktop-linux`) pointed at an
+  inactive Docker Desktop socket, while a real `dockerd` was already running
+  and reachable via the `default` context. `docker context use default`
+  fixed it.
+
+**Verified (acceptance criteria from the plan):**
+- `docker compose run --rm dev-tech-news python scripts/generate_newsletter.py
+  --skip-crawling --skip-classifiers --area AI --max-articles 3 --site-dir site`
+  — real RSS fetch + crawl4ai/Playwright scraping *inside the container*
+  worked, including the raw-page rejection path firing correctly on real
+  scraped content (same check verified on the host earlier).
+- `docker compose run --rm dev-tech-news python scripts/build_site.py
+  --site-dir site` — the standalone rebuild path (no LLM/network) also
+  verified inside the container, confirming both CMD-override invocation
+  modes the push-to-deploy step (Step 8) will need.
+- Bind-mounted `site/`, `processed_urls.json`, and the three CSVs all
+  read/write correctly from the non-root container user back to the host
+  filesystem, with matching ownership (both happened to be UID 1000 —
+  worth a quick re-check on the actual Tencent VM's `deploy` user, though
+  not expected to differ).
+- Added `site/` to `.gitignore` (generated output, not source) — it was
+  briefly untracked-but-not-ignored during this testing.
+
+**Not yet done:** a real full run with actual LLM classification (no
+`--skip-classifiers`) hasn't been verified inside the container, since that
+needs real OpenAI credits — the code path is identical to what already runs
+on the host today and isn't something Docker packaging could plausibly
+affect, so this is a low-risk gap, not a skipped acceptance criterion.
+
+**Deviations:** none from the plan's Step 1 design.
