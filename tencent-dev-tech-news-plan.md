@@ -635,3 +635,33 @@ maintenance burden without adding real protection.
 
 **Not yet done:** Tailscale for SSH access (to stop dynamic-IP lockouts),
 and Step 8/9 (push-to-deploy runner), are still open.
+
+---
+
+### 2026-09-09 - Step 5 (scheduling) complete ✅
+
+Every run up to this point had been triggered manually over SSH — no actual
+scheduling existed. Added `deploy/systemd/dev-tech-news.service` +
+`.timer` (daily, `OnCalendar=*-*-* 09:00:00`, `Persistent=true` so a missed
+run catches up on next boot rather than waiting a full day). Set the VM's
+timezone to `Europe/Warsaw` first (was `Asia/Shanghai`, Tencent's default
+image setting, unrelated to the box's actual Frankfurt location) so "09:00"
+means what it obviously should, including correct DST handling going
+forward.
+
+**Verified, not just installed:** manually fired `sudo systemctl start
+dev-tech-news.service` once to confirm the systemd invocation path — a
+different environment than the interactive-SSH runs used for every previous
+test — actually works end-to-end. It does: `journalctl -u dev-tech-news`
+showed real crawling/LLM-analysis output, the run finished
+`status=0/SUCCESS`, and it correctly loaded the 114 already-processed URLs
+from the prior run (35 new articles added, no wasted re-analysis) —
+confirming state persistence works across systemd-triggered runs too, not
+just the manual ones already tested.
+
+Kept `--crawl-concurrency 2` in the service's `ExecStart` — see
+CHANGELOG.md §0.3.1 for why the default isn't safe on this box.
+
+**Deviations:** none. This closes the last of the plan's original numbered
+steps except Step 9 (push-to-deploy runner), which was always understood to
+be a later addition once the rest was stable.
