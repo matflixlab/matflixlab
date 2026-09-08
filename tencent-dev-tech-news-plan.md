@@ -178,8 +178,42 @@ in.
 
 ## Step 5 — Build the news.matflixlab.pl site (cards, 7-day rotation, matflixlab visual identity)
 
-Replaces a plain "serve the latest PDF" approach with a small static site:
-one card per day, most recent 7 kept.
+**Revised 2026-09-08: PDF output is dropped entirely.** The original version of
+this step kept `generate_newsletter.py` producing a PDF via reportlab and just
+wrapped it in a card linking to that file. Mateusz decided the PDF serves no
+purpose once the destination is a web page — `reporters.py` (the whole
+reportlab pipeline) is removed, along with the `reportlab` dependency and
+`test_reporters.py`. `build_site.py` becomes the sole output renderer.
+
+**Card design (decided):** a single page, one card per day, **full content
+inline** (not a summary linking to a separate per-day page) — all 7 days'
+article listings visible on `news.matflixlab.pl` directly, grouped by
+category/subcategory the same way the old PDF was (AI, AWS & Infrastructure,
+CI/CD, Databases, Observability & Monitoring, Conferences). A `<details>`
+per-day wrapper (collapsed by default, most recent expanded) is worth
+considering purely for page length/usability, but the content itself is not
+gated behind a click-through.
+
+**Security note this change introduces:** with a PDF, `sanitizers.escape_markup`
+existed to stop malformed reportlab markup from crashing the whole document —
+see [dev-tech-news/CLAUDE.md](../dev-tech-news/CLAUDE.md) and the CHANGELOG
+incident it's based on. Rendering scraped article content **directly into an
+HTML page** raises the stakes on that same invariant from "one bad article
+breaks the PDF" to "one bad article runs a script in every visitor's browser."
+Every piece of LLM/scraped-derived text (title, summary, subcategory) must be
+HTML-escaped at render time — reuse the same "never let raw/unparsed content
+through" discipline `ArticleAnalyzer` already enforces, but the escaping
+mechanism itself changes from reportlab-markup-escaping to standard
+HTML-escaping (e.g. Jinja2 autoescape, or Python's `html.escape` if
+hand-rolling the template).
+
+- Add a structured output step to the pipeline (a new small module or a method
+  on the existing pipeline result) that serializes each day's analyzed
+  articles to `site/data/<YYYY-MM-DD>.json` — grouped the same way the PDF
+  grouped them (category → subcategory → list of `{title, url, summary}`).
+  This is what `build_site.py` reads; it does not need to touch
+  `ArticleAnalyzer`/`connectors.py` at all, only the terminal step that used
+  to hand results to `PdfReporter`.
 
 - **Visual identity — reuse, don't reinvent.** Copy the CSS custom properties
   and general aesthetic straight from
@@ -323,3 +357,50 @@ the runner lives directly on the box being deployed to.
 - **Known-benign cosmetic issue:** `cloud-init status` permanently reports `error`, not `done` — the failing module is Tencent's own platform-injected password-reset step trying `chpasswd` for a `ubuntu` user that doesn't exist (our `users:` list only creates `deploy`). Harmless since password auth is disabled entirely, but don't be alarmed by the "error" status on future checks — it's not our config failing.
 
 **Deviations:** region is `eu-frankfurt` per Mateusz's call (similar pricing to Hong Kong/Singapore, better latency for a mostly-European audience), not Hong Kong/Singapore as the plan originally drafted — the ICP-filing constraint still applies equally and is satisfied. Disk sized to 20GB, not the plan's original 50GB, after a cost/usage evaluation (50GB would have cost an extra ~$1.50/month for headroom that wasn't needed).
+
+---
+
+### 2026-09-08 - Step 5: implemented and tested locally (no PDF) ✅
+
+Built on `feature/html-news-site` in `dev-tech-news` (PDF behavior preserved
+on `master-pdf`, pushed to origin — see Step 5's revised design above for why
+PDF was dropped and what the card content decision was).
+
+**Implemented:**
+- `src/dev_tech_news/site_builder.py`: `write_daily_data()` (sanitizes +
+  groups + writes `site/data/<date>.json`) and `build_site()` (prunes beyond
+  7 days, renders `index.html`, no network/LLM — this is what the future
+  push-to-deploy step calls alone).
+- `scripts/build_site.py`: thin CLI wrapper around `build_site()`.
+- `scripts/generate_newsletter.py`: `--output <pdf>` replaced with
+  `--site-dir`/`--max-days-published`; calls `write_daily_data` +
+  `build_site` instead of `PdfReporter`. The old "skip publishing entirely on
+  zero articles" behavior was replaced with "publish an empty card for the
+  day" — more honest for a calendar of daily cards than a silent gap.
+- Removed: `reporters.py`, `tests/test_reporters.py`, `reportlab` dependency,
+  `utils.pdf_page_count`. Renamed `PdfReportAdapter` → `ReportAdapter`.
+- `tests/test_site_builder.py`: 12 new tests (escaping/XSS, raw-page
+  rejection, truncation, URL-scheme validation, 7-day pruning, empty-state,
+  Conferences flat rendering, most-recent-day-expanded).
+
+**Verified:**
+- Full suite: `170 passed` (up from 158 before this change — net of the 12
+  new tests and the 4 removed PDF-specific ones).
+- Real end-to-end run against live RSS feeds (`--skip-classifiers`, no
+  OpenAI calls): correctly rejected a **41KB raw scrape** from a real
+  ClickHouse blog page and fell back to its title — the exact 13.08.2026
+  failure mode, caught live rather than only in a synthetic test.
+- XSS escaping verified against a `<script>` payload in both a unit test and
+  manually — rendered as `&lt;script&gt;`, never executes.
+- `scripts/build_site.py` re-render verified independently (no LLM/network
+  calls, rebuilds `index.html` from existing JSON only).
+
+**Not yet done:** the matflixlab-visual-identity CSS was hand-written to
+match the landing page's tokens (colors, font stack, prompt-style header) but
+has not been visually compared side-by-side in a browser against
+matflixlab.pl — worth doing before Step 7 (DNS/exposure). Containerizing
+this (Step 1) and deploying it to the actual Tencent VM (Step 3 onward)
+haven't happened yet — this step only covers local implementation/testing.
+
+**Deviations:** none from the revised (no-PDF, inline-content) design agreed
+before implementation.
