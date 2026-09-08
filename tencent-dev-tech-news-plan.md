@@ -461,3 +461,59 @@ on the host today and isn't something Docker packaging could plausibly
 affect, so this is a low-risk gap, not a skipped acceptance criterion.
 
 **Deviations:** none from the plan's Step 1 design.
+
+---
+
+### 2026-09-08 - Step 3: first deploy — hit a real incident, VM crashed twice ⚠️
+
+**Setup completed:** dedicated read-only deploy key generated on the VM
+(`github-dev-tech-news` SSH alias there), repo cloned on
+`feature/html-news-site`, `.env` created **directly on the VM by Mateusz via
+SSH** (deliberately never passed through this conversation, after an earlier
+close call — see note below), `processed_urls.json`/`site/` seeded, image
+built successfully.
+
+**Incident:** the first real (unflagged) `docker compose run --rm
+dev-tech-news` — default args, no `--crawl-concurrency` override — pegged
+CPU at 100% and made SSH to the VM completely unresponsive (confirmed by both
+Mateusz and independently from this session — a background `docker ps` check
+also hung). Required a console restart (More Actions → Restart) to recover.
+Retried with `--crawl-concurrency 2`, watched via a load-average monitor this
+time — load climbed past 11 and SSH died again, **during the website-crawling
+phase**, before the RSS phase (which had respected the flag) showed any
+danger.
+
+**Root cause found and fixed** (full detail: `dev-tech-news/CHANGELOG.md`
+§0.3.1): `--crawl-concurrency` only ever applied to `RssConnector`.
+`WebsiteCrawlingConnector`/`ConferenceCrawlingConnector` each hardcoded their
+own limit (5) and additionally called a markdown-extraction helper with its
+own unrelated default (8) — and because that inner call happens *inside* the
+outer per-site semaphore, the real worst case was `crawl_concurrency²` (up to
+40 concurrent headless-Chromium sessions), completely independent of the
+flag. Fixed by moving `crawl_concurrency` into the actual shared base class
+and threading it through every call site; added `tests/test_connectors.py`
+to pin the wiring. Pushed to `feature/html-news-site` (commits `0a499ed`,
+`7b65005` — the latter adds 2GB swap via cloud-init as a defense-in-depth
+safety net for *future* memory spikes, not a fix for this one).
+
+**Process note — a mistake worth recording:** during recovery, an attempt to
+find a possibly-lost `.env` via VS Code's local history **printed two real
+OpenAI API keys in plaintext into the conversation transcript**. Both were
+told to be revoked immediately and replaced. Going forward in this project,
+secrets are created directly on the target host by Mateusz over his own SSH
+session — never generated, displayed, or piped through by the agent, even
+via a redirect-without-echo. This is now the standing convention, not a
+one-time fix.
+
+**Not yet done:** the real full run with actual LLM classification still
+hasn't successfully completed end-to-end on the VM — both attempts crashed
+mid-run. Next attempt should use the fixed code with `--crawl-concurrency 2`
+(now actually enforced everywhere) and confirm completion before considering
+Step 3 done. Concurrency 2 still has a `2²=4` worst case per the
+not-fully-fixed multiplicative issue noted in the CHANGELOG — acceptable for
+now, worth revisiting (single shared semaphore) if 2 still isn't safe enough.
+
+**Deviations:** none from the plan's own design — this was an unanticipated
+real-world resource constraint on the chosen instance size, not a plan
+error, though `SA2.MEDIUM4` (2 vCPU/4GB) is clearly closer to the edge for
+this workload than hoped.
