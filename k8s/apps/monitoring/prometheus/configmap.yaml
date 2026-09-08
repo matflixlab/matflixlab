@@ -62,6 +62,13 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: node-exporter
+        # Tencent Cloud VM — see tencent-server-observability.md. Public IP,
+        # restricted at the Security Group level to the home IP (same CIDR
+        # as SSH); node_exporter itself has no auth of its own.
+        static_configs:
+          - targets: ['162.62.135.86:9100']
+            labels:
+              location: tencent-cloud
 
       # Prometheus itself
       - job_name: 'prometheus'
