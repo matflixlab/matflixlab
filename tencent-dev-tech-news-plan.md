@@ -566,3 +566,64 @@ certificate being placed) — do that next, then re-test
 **Deviations:** SSH access hardening (Tailscale) and Step 8/9 (push-to-deploy
 runner) both still pending — this entry only closes out Step 3 and the
 immediate DNS/TLS troubleshooting, not the whole plan.
+
+---
+
+### 2026-09-08 - Step 6 (exposure) complete: news.matflixlab.pl is live ✅
+
+Three separate, stacked problems had to be found and fixed before the
+Cloudflare→origin path actually worked — worth recording all three since any
+one of them alone would have looked like "the fix," but none of them alone
+was sufficient:
+
+1. **Wrong routing mechanism.** `news.matflixlab.pl` was initially configured
+   as a **Cloudflare Tunnel route** (`http://162.62.135.86:80` as the tunnel's
+   Service URL) — the same mechanism used for the home-hosted subdomains.
+   This meant traffic went browser → Cloudflare edge → `cloudflared` on the
+   **home server** → out to the Tencent VM, making the Tencent-hosted site
+   depend on home-server/home-internet uptime for no reason, and it doesn't
+   match the security group (which only allows Cloudflare's own edge IP
+   ranges — the home server's outbound IP isn't in that list, so the
+   connection was silently dropped). Fixed by replacing it with a plain
+   proxied **DNS A record** (`news` → `162.62.135.86`), which makes Cloudflare's
+   edge connect directly, from an IP that's actually in the allowlisted range.
+   The other subdomains keep using the Tunnel — no conflict, different DNS
+   records.
+2. **`ufw` never had 80/443 opened.** The cloud-init hardening only ever
+   explicitly allowed 22/tcp; nginx being added later (Step 5/6) never got a
+   corresponding `ufw allow`. This is independent of the Security Group and
+   blocked *all* external traffic to 80/443 regardless of source IP — the
+   Security Group being correctly scoped to Cloudflare's ranges didn't matter
+   because the host firewall behind it was still closed. Symptom was
+   Cloudflare error 522 (connection timeout) even though `curl localhost`
+   on the VM itself worked fine (loopback doesn't hit the same filtering
+   path). Fixed with `ufw allow 80/tcp` / `ufw allow 443/tcp` — not scoped to
+   Cloudflare's ranges specifically, since the Security Group is already the
+   authoritative IP restriction here (matches the existing "ufw is
+   belt-and-suspenders, not load-bearing" design note in cloud-init.yaml.tftpl).
+   **Not yet reflected in the Terraform template** — cloud-init only runs on
+   first boot, so a future fresh VM would hit this same gap; worth adding
+   `ufw allow 80/tcp`/`443/tcp` to `cloud-init.yaml.tftpl` as a follow-up.
+3. **Cloudflare's SSL/TLS mode was "Automatic," which had detected/pinned
+   "Full."** With nginx TLS removed in favor of Flexible mode (see the
+   revert commit `8350e54` — Cloudflare's edge terminates TLS, origin gets
+   plain HTTP, which is safe here specifically because the Security Group
+   already restricts 80/443 to Cloudflare's ranges), "Automatic" mode was
+   still enforcing HTTPS-to-origin against a port 443 nothing was listening
+   on. Symptom was Cloudflare error 521 (origin refused the connection) —
+   different from 522, and the distinction is what pointed at this being an
+   application/TLS-mode issue rather than another network/firewall gap.
+   Fixed by explicitly selecting **Flexible** (not "Automatic") in
+   SSL/TLS → Overview. This is a **zone-wide** setting on the Free plan, so
+   it also applies to the Tunnel-routed subdomains — verified no regression
+   there (`speakstats.matflixlab.pl` still returns `200` after the change;
+   Tunnel-routed hosts use their own Service URL scheme, not this setting).
+
+**Verified:** `https://news.matflixlab.pl/` returns `200` with the real
+generated site (correct title, real day-cards from the successful Step 3
+run). `https://speakstats.matflixlab.pl/` still returns `200` (regression
+check on the zone-wide SSL mode change).
+
+**Not yet done:** `ufw` port-opening isn't yet folded back into
+`cloud-init.yaml.tftpl` (see finding #2). Tailscale for SSH access, and
+Step 8/9 (push-to-deploy runner), are still open.
