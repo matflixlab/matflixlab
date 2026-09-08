@@ -633,6 +633,9 @@
       'jellyfin.desc': 'Matflix is my home cinema. I\'m a fan of obscure, old films that never made it to any streaming platform &mdash; the kind that live on dusty DVDs and nowhere else. So I built my own streaming service with Jellyfin to watch them anywhere and share them with my closest friends.',
       'jellyfin.arch': 'architecture',
 
+      // Dev Tech News
+      'news.desc': 'To keep up with what\'s relevant in tech, I built a news assembler. RSS feeds and blogs get crawled daily, an LLM judges relevance and writes one-line summaries, and the results publish here every day &mdash; AI, cloud infra, CI/CD, databases, observability. Last 7 days, no login.',
+
       // Umami
       'umami.desc':    'My wife works in marketing and never lets me forget that everything needs to be measured. She\'s right &mdash; you can\'t improve something you don\'t measure. So I added self-hosted analytics to my portfolio &mdash; live visitor stats, countries and more. The full dashboard is public, nothing to hide.',
       'umami.extlink': 'view dashboard &#8599;',
@@ -707,6 +710,9 @@
       // Jellyfin
       'jellyfin.desc': 'Matflix to moje domowe kino. Jestem fanem niszowych, starych filmów, których nie znajdziesz na żadnym streamingu &mdash; takich, które żyją już tylko na zakurzonych DVD. Więc zbudowałem własny serwis streamingowy z Jellyfin, żeby oglądać je wszędzie i dzielić się nimi z najbliższymi znajomymi.',
       'jellyfin.arch': 'architektura',
+
+      // Dev Tech News
+      'news.desc': 'Żeby nadążyć za tym, co ważne w technologii, zbudowałem news assembler. Codziennie crawlowane są kanały RSS i blogi, LLM ocenia trafność i pisze jednozdaniowe streszczenia, a wyniki publikują się tutaj każdego dnia &mdash; AI, infrastruktura chmurowa, CI/CD, bazy danych, observability. Ostatnie 7 dni, bez logowania.',
 
       // Umami
       'umami.desc':    'Moja żona pracuje w marketingu i regularnie mi przypomina, że wszystko trzeba mierzyć. Ma rację &mdash; nie możesz poprawić czegoś, czego nie mierzysz. Więc dodałem własne narzędzie analityczne do portfolio &mdash; statystyki odwiedzin, kraje i więcej. Dashboard jest publiczny, nie mam nic do ukrycia.',
@@ -1079,6 +1085,32 @@ flowchart TD
             <div class="service-desc" data-i18n="jellyfin.desc">
               Self-hosted media server for movies, TV shows and music.
               Access restricted to approved users.
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Dev Tech News -->
+    <div class="service-card">
+      <a class="service-header" href="https://news.matflixlab.pl">
+        <div class="service-header-left">
+          <div>
+            <div class="service-name-row">
+              <span class="status-dot" title="public"></span>
+              <span class="service-name">Dev Tech News</span>
+            </div>
+            <span class="ext-link">news.matflixlab.pl &#8599;</span>
+            <div class="service-desc" data-i18n="news.desc">
+              Forked this from an internal tool at work and rebuilt it standalone. RSS feeds
+              and blogs get crawled daily, an LLM judges relevance and writes one-line
+              summaries, and the result publishes here as a card &mdash; AI, cloud infra,
+              CI/CD, databases, observability. Last 7 days, no login, no PDF to download.
+            </div>
+            <div class="service-badges">
+              <span class="badge">Python</span>
+              <span class="badge">OpenAI</span>
+              <span class="badge">crawl4ai</span>
             </div>
           </div>
         </div>
