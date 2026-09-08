@@ -624,6 +624,14 @@ generated site (correct title, real day-cards from the successful Step 3
 run). `https://speakstats.matflixlab.pl/` still returns `200` (regression
 check on the zone-wide SSL mode change).
 
-**Not yet done:** `ufw` port-opening isn't yet folded back into
-`cloud-init.yaml.tftpl` (see finding #2). Tailscale for SSH access, and
-Step 8/9 (push-to-deploy runner), are still open.
+**Update 2026-09-08, same day:** rather than keep `ufw` in sync with the
+Security Group going forward, Mateusz opted to remove `ufw` entirely —
+disabled on the live VM (`sudo ufw disable`) and dropped from
+`cloud-init.yaml.tftpl` for future rebuilds. Reasoning: two independently-
+maintained firewalls drifting out of sync is exactly what caused finding #2
+above; the Security Group alone (SSH from one IP, 80/443 from Cloudflare's
+ranges) is the actually-authoritative perimeter, so a second one added
+maintenance burden without adding real protection.
+
+**Not yet done:** Tailscale for SSH access (to stop dynamic-IP lockouts),
+and Step 8/9 (push-to-deploy runner), are still open.
