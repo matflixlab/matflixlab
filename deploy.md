@@ -249,6 +249,7 @@ Cloudflare Zero Trust → Networks → Tunnels → tunel → Edit → Public Hos
 | landing | matflixlab | ConfigMap: `landing-html` |
 | grafana | monitoring | ConfigMap: `grafana-datasources`, `grafana-ini` |
 | umami | matflixlab | Secret: `umami-secret` |
+| prometheus | monitoring | ConfigMap: `prometheus-config` |
 
 ### Weryfikacja działania
 

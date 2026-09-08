@@ -160,3 +160,13 @@ dashboard changes needed.
 `kubectl -n monitoring rollout restart deployment/prometheus` (same manual
 step as before, still no Reloader annotation on this deployment) + a fresh
 `up{job="node-exporter"}` check in Grafana Explore.
+
+**Note on the manual restart:** one restart attempt landed mid-way through
+an ArgoCD sync and briefly crash-looped a new pod (old pod stayed `Running`
+throughout — no actual downtime, Kubernetes correctly held the rollout back
+from an unhealthy new pod). Self-resolved once the sync fully landed; not
+investigated further since it was transient and didn't recur. Added the
+`reloader.stakater.com/auto: "true"` annotation to
+`k8s/apps/monitoring/prometheus/deployment.yaml` (same pattern as
+`landing`/`grafana`/`umami`) so this manual step — and the timing hazard of
+running it mid-sync — goes away entirely going forward.
