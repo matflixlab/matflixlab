@@ -123,3 +123,40 @@ then a look at the dashboard.
 ## Execution log
 
 <!-- Append dated entries here per step, same convention as the other plan docs -->
+
+### 2026-09-09 - Steps 1-3 done, hit a real bug, fixed ✅
+
+Steps 1 (Security Group rule) and 2 (`node_exporter` running on the VM) both
+verified working independently: `curl` to `162.62.135.86:9100/metrics`
+succeeded both from the VM itself and from the allowlisted home IP. Also
+checked and ruled out a plausible alternate theory before assuming Step 3 was
+the problem — confirmed `matflix-server` (running Prometheus) and the
+workstation used for SSH/Terraform share the same public IP, so it wasn't a
+"different machine, different IP" mismatch.
+
+**Real bug found in Step 3's first attempt:** putting the Tencent target's
+`static_configs` inside the *same* job block as the existing
+`kubernetes_sd_configs`-based `node-exporter` job caused it to be silently
+dropped — not scraped, not even reported as `down`. Diagnosed via
+`up{job="node-exporter"}` in Grafana Explore showing only `matflix-server`,
+with zero trace of the Tencent instance at all (the "not even a 0" detail is
+what pointed at a relabel-time drop rather than a network/reachability
+failure). Root cause: that job's `relabel_configs` does a `keep` action on
+`__meta_kubernetes_service_name`, a label that only exists for
+`kubernetes_sd_configs`-discovered targets — for a `static_configs` target
+the label is simply absent, the regex match fails against an empty string,
+and `keep` filters it out before a single scrape attempt.
+
+**Fix:** gave the Tencent target its own `job_name` (`node-exporter-tencent`
+— Prometheus requires these to be unique) with its own `relabel_configs` that
+overrides the exported `job` *label* back to `node-exporter`. This is the
+standard pattern for "distinct config identity, same resulting label" —
+Prometheus's internal `job_name` and the `job` label attached to scraped
+series are independent, so this lands the Tencent series under the exact
+same `job="node-exporter"` value the dashboard already filters on, with no
+dashboard changes needed.
+
+**Status: fix pushed, not yet re-verified** — needs ArgoCD sync +
+`kubectl -n monitoring rollout restart deployment/prometheus` (same manual
+step as before, still no Reloader annotation on this deployment) + a fresh
+`up{job="node-exporter"}` check in Grafana Explore.

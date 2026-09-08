@@ -62,13 +62,26 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: node-exporter
-        # Tencent Cloud VM — see tencent-server-observability.md. Public IP,
-        # restricted at the Security Group level to the home IP (same CIDR
-        # as SSH); node_exporter itself has no auth of its own.
+
+      # Tencent Cloud VM's node_exporter — see tencent-server-observability.md.
+      # Needs its own job_name (Prometheus requires these to be unique), but
+      # relabeled to job="node-exporter" so it lands under the same dashboard
+      # filter as matflix-server. Putting a static_configs target inside the
+      # job above instead silently dropped it: that job's relabel_configs does
+      # `keep` on __meta_kubernetes_service_name, a label that only exists for
+      # kubernetes_sd_configs-discovered targets — for a static target it's
+      # absent, the regex match fails against an empty string, and `keep`
+      # drops it before it's ever scraped (not even reported as down).
+      # Public IP, restricted at the Security Group level to the home IP
+      # (same CIDR as SSH); node_exporter itself has no auth of its own.
+      - job_name: 'node-exporter-tencent'
         static_configs:
           - targets: ['162.62.135.86:9100']
-            labels:
-              location: tencent-cloud
+        relabel_configs:
+          - target_label: job
+            replacement: node-exporter
+          - target_label: location
+            replacement: tencent-cloud
 
       # Prometheus itself
       - job_name: 'prometheus'
