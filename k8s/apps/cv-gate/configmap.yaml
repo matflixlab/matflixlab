@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cv-gate-app
+  namespace: matflixlab
+data:
+  app.py: |
+    import os, re, secrets, time
+    import requests
+    from flask import Flask, request, jsonify, send_file
+
+    app = Flask(__name__)
+
+    RESEND_API_KEY = os.environ['RESEND_API_KEY']
+    FROM_EMAIL     = os.environ.get('FROM_EMAIL', 'matflixlab <cv@send.matflixlab.pl>')
+    CV_PATH        = os.environ.get('CV_PATH', '/cv/CV_DevOps-SRE_mjochemski.pdf')
+    TTL            = 300
+
+    EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]{2,}$')
+    CODES    = {}          # email -> (code, expires_at); pamiec procesu, 1 replica
+
+    def prune():
+        now = time.time()
+        for k in [k for k, v in CODES.items() if v[1] < now]:
+            CODES.pop(k, None)
+
+    @app.get('/cv-gate/health')
+    def health():
+        return jsonify(ok=True, pending=len(CODES))
+
+    @app.post('/cv-gate/request')
+    def request_code():
+        prune()
+        email = (request.get_json(silent=True) or {}).get('email', '').strip().lower()
+        if not EMAIL_RE.match(email):
+            return jsonify(error='Invalid email address'), 400
+
+        # Wazny kod juz istnieje -> nie wysylamy drugiego maila. To jedyna ochrona
+        # przed zalewaniem cudzej skrzynki; twardym sufitem jest limit 100/dzien u Resend.
+        entry = CODES.get(email)
+        if entry and entry[1] > time.time():
+            return jsonify(ok=True, expiresIn=int(entry[1] - time.time()))
+
+        code = f'{secrets.randbelow(1000000):06d}'
+        CODES[email] = (code, time.time() + TTL)
+
+        try:
+            r = requests.post(
+                'https://api.resend.com/emails',
+                headers={'Authorization': f'Bearer {RESEND_API_KEY}'},
+                json={
+                    'from': FROM_EMAIL,
+                    'to': [email],
+                    'subject': 'Your CV download code',
+                    'text': (f'Your verification code: {code}\n\n'
+                             'Valid for 5 minutes.\n\n-- matflixlab.pl'),
+                },
+                timeout=10,
+            )
+        except requests.RequestException as exc:
+            CODES.pop(email, None)
+            app.logger.error('resend request failed: %s', exc)
+            return jsonify(error='Could not send email, try again later'), 502
+
+        # Bez tego user widzi "wyslano" i czeka na maila, ktory nie przyjdzie.
+        if not r.ok:
+            CODES.pop(email, None)
+            app.logger.error('resend %s: %s', r.status_code, r.text)
+            return jsonify(error='Could not send email, try again later'), 502
+
+        return jsonify(ok=True, expiresIn=TTL)
+
+    @app.post('/cv-gate/verify')
+    def verify():
+        data  = request.get_json(silent=True) or {}
+        email = data.get('email', '').strip().lower()
+        code  = str(data.get('code', '')).strip()
+
+        entry = CODES.get(email)
+        if not entry or entry[1] < time.time():
+            CODES.pop(email, None)
+            return jsonify(error='Code expired - request a new one'), 404
+        if entry[0] != code:
+            return jsonify(error='Invalid code'), 401
+
+        del CODES[email]                      # kod jednorazowy
+        return send_file(CV_PATH, as_attachment=True,
+                         download_name='CV_DevOps-SRE_mjochemski.pdf')
+
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=8080)

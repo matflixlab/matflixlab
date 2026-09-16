@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-gate
+  namespace: matflixlab
+  labels:
+    app: cv-gate
+spec:
+  # WYMAGANE, nie kosmetyka: kody OTP zyja w pamieci procesu, wiec przy dwoch
+  # podach kod wygenerowany przez jeden nie bylby widoczny dla drugiego.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cv-gate
+  template:
+    metadata:
+      labels:
+        app: cv-gate
+      annotations:
+        reloader.stakater.com/auto: "true"
+    spec:
+      containers:
+        - name: cv-gate
+          image: python:3.12-alpine
+          command: ["sh", "-c"]
+          args:
+            - |
+              pip install flask requests --quiet && python /app/app.py
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RESEND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cv-gate-secret
+                  key: RESEND_API_KEY
+          volumeMounts:
+            - name: app
+              mountPath: /app
+            - name: cv
+              mountPath: /cv
+              readOnly: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          readinessProbe:
+            httpGet:
+              path: /cv-gate/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+      volumes:
+        - name: app
+          configMap:
+            name: cv-gate-app
+        # Ten sam katalog, ktory montuje nginx landingu - jedno zrodlo prawdy.
+        - name: cv
+          hostPath:
+            path: /home/matflix/matflixlab/cv
+            type: DirectoryOrCreate

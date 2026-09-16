@@ -20,4 +20,5 @@ resources:
   - apps/jellyfin
   - apps/umami
   - apps/umami-proxy
+  - apps/cv-gate
   - apps/monitoring

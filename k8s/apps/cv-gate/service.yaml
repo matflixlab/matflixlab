@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cv-gate
+  namespace: matflixlab
+spec:
+  selector:
+    app: cv-gate
+  ports:
+    - port: 8080
+      targetPort: 8080

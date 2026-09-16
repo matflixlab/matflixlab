@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cv-gate
+  namespace: matflixlab
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  # Ten sam host co landing, tylko dluzsza sciezka. Traefik rozstrzyga kolizje
+  # po dlugosci reguly, wiec PathPrefix(/cv-gate) wygrywa z PathPrefix(/).
+  # Dzieki temu: zadnej nowej subdomeny, zadnej zmiany w Cloudflare Tunnel,
+  # zadnego CORS-u (to samo origin co strona).
+  rules:
+    - host: matflixlab.pl
+      http:
+        paths:
+          - path: /cv-gate
+            pathType: Prefix
+            backend:
+              service:
+                name: cv-gate
+                port:
+                  number: 8080
