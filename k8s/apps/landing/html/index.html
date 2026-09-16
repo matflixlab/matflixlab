@@ -571,6 +571,10 @@
       margin-top: 0.7rem; text-align: center;
       font-size: 0.68rem; color: var(--muted);
     }
+    .modal-hint {
+      margin-top: 0.35rem; text-align: center;
+      font-size: 0.66rem; color: var(--muted); opacity: 0.8;
+    }
   </style>
   <!-- Umami tracking -->
   <script defer src="https://umami.matflixlab.pl/script.js" data-website-id="93324562-e1ea-478b-9c9e-8fed70384d06"></script>
@@ -673,6 +677,7 @@
       'cvgate.sentTo':    'code sent to',
       'cvgate.verify':    'verify &amp; download',
       'cvgate.expires':   'expires in',
+      'cvgate.spam':      'Can&#39;t find it? Check your spam folder.',
 
       // homelab stack card
       'homelab.desc': 'Single-node homelab running on a laptop. Built on <strong>k3s</strong> — a lightweight Kubernetes distribution. All services are containerised and managed via <strong>Kustomize</strong> manifests. Exposed to the internet through a <strong>Cloudflare Tunnel</strong> — no open ports, no public IP required. Used as a platform for learning Kubernetes and shipping personal projects.',
@@ -761,6 +766,7 @@
       'cvgate.sentTo':    'kod wysłany na',
       'cvgate.verify':    'zweryfikuj i pobierz',
       'cvgate.expires':   'wygasa za',
+      'cvgate.spam':      'Nie widzisz maila? Sprawdź folder spam.',
 
       // homelab stack card
       'homelab.desc': 'Jednowęzłowy homelab działający na laptopie. Oparty na <strong>k3s</strong> — lekkiej dystrybucji Kubernetesa. Wszystkie serwisy są skonteneryzowane i zarządzane przez manifesty <strong>Kustomize</strong>. Udostępniane przez <strong>Cloudflare Tunnel</strong> — bez otwartych portów, bez publicznego IP. Platforma do nauki Kubernetesa i wdrażania własnych projektów.',
@@ -1598,6 +1604,7 @@ flowchart TD
         <button class="btn primary" type="button" id="cv-verify-btn" data-i18n="cvgate.verify">verify &amp; download</button>
         <div class="modal-error" id="cv-code-error" role="alert"></div>
         <p class="modal-timer"><span data-i18n="cvgate.expires">expires in</span> <span id="cv-countdown">5:00</span></p>
+        <p class="modal-hint" data-i18n="cvgate.spam">Can't find it? Check your spam folder.</p>
       </div>
     </div>
   </div>
