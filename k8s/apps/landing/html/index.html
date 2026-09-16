@@ -526,6 +526,51 @@
     }
     .site-footer a { color: var(--muted); text-decoration: none; }
     .site-footer a:hover { color: var(--accent); }
+
+    /* ── CV GATE MODAL ── */
+    .modal {
+      position: fixed; inset: 0; z-index: 9999; padding: 1rem;
+      background: rgba(0,0,0,0.78);
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* [hidden] przegrywa specyficznoscia z display:flex — trzeba wymusic */
+    .modal[hidden] { display: none; }
+    .modal-content {
+      position: relative; width: 100%; max-width: 360px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1.5rem;
+    }
+    .modal-content h3 {
+      margin: 0 0 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text);
+    }
+    .modal-content p { margin: 0; font-size: 0.72rem; color: var(--muted); }
+    .modal-close {
+      position: absolute; right: 0.6rem; top: 0.3rem; padding: 0;
+      background: none; border: none; color: var(--muted);
+      font-size: 1.3rem; line-height: 1; cursor: pointer;
+    }
+    .modal-close:hover { color: var(--accent); }
+    .modal-step input {
+      width: 100%; box-sizing: border-box;
+      font-family: inherit; font-size: 0.78rem;
+      padding: 0.5rem 0.6rem; margin: 0.9rem 0 0.6rem;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
+    }
+    .modal-step input:focus { outline: none; border-color: var(--accent); }
+    .modal-step .btn { width: 100%; justify-content: center; }
+    .modal-step .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    #cv-code {
+      letter-spacing: 0.35em; text-align: center; font-variant-numeric: tabular-nums;
+    }
+    .modal-error {
+      min-height: 0.9rem; margin-top: 0.5rem;
+      font-size: 0.7rem; color: #f87171;
+    }
+    .modal-timer {
+      margin-top: 0.7rem; text-align: center;
+      font-size: 0.68rem; color: var(--muted);
+    }
   </style>
   <!-- Umami tracking -->
   <script defer src="https://umami.matflixlab.pl/script.js" data-website-id="93324562-e1ea-478b-9c9e-8fed70384d06"></script>
@@ -617,7 +662,17 @@
       'portfolio.role': 'DevOps / SRE Engineer',
       'portfolio.bio':  '<strong>3+ years</strong> in DevOps/SRE supporting trading and market-making platforms at <strong>Match-Trade Technologies</strong>. Day-to-day work spans <strong>AWS infrastructure</strong> with 200+ servers across 8 regions, a <strong>47-role Ansible framework</strong>, <strong>200+ Jenkins pipelines</strong>. Developing and maintaining this platform to deepen <strong>Kubernetes</strong> expertise and ship personal projects.',
       'portfolio.cv':       '&#8659; download cv',
+      'portfolio.request':  '&#9993; request my resume',
       'portfolio.linkedin': 'linkedin &#8599;',
+
+      // cv gate (email otp)
+      'cvgate.title':     'request my resume',
+      'cvgate.intro':     'Enter your email to receive a 6-digit verification code.',
+      'cvgate.send':      'send code',
+      'cvgate.codeTitle': 'enter the code',
+      'cvgate.sentTo':    'code sent to',
+      'cvgate.verify':    'verify &amp; download',
+      'cvgate.expires':   'expires in',
 
       // homelab stack card
       'homelab.desc': 'Single-node homelab running on a laptop. Built on <strong>k3s</strong> — a lightweight Kubernetes distribution. All services are containerised and managed via <strong>Kustomize</strong> manifests. Exposed to the internet through a <strong>Cloudflare Tunnel</strong> — no open ports, no public IP required. Used as a platform for learning Kubernetes and shipping personal projects.',
@@ -695,7 +750,17 @@
       'portfolio.role': 'Inżynier DevOps / SRE',
       'portfolio.bio':  '<strong>3+ lata</strong> w DevOps/SRE przy platformach tradingowych i market-makingowych w <strong>Match-Trade Technologies</strong>. Codzienna praca obejmuje <strong>infrastrukturę AWS</strong> z 200+ serwerami w 8 regionach, <strong>framework Ansible złożony z 47 ról</strong> oraz <strong>200+ pipeline\'ów Jenkins</strong>. Projekt prowadzony w celu pogłębienia wiedzy o <strong>Kubernetesie</strong> i wdrażania własnych projektów.',
       'portfolio.cv':       '&#8659; pobierz cv',
+      'portfolio.request':  '&#9993; poproś o cv',
       'portfolio.linkedin': 'linkedin &#8599;',
+
+      // cv gate (email otp)
+      'cvgate.title':     'poproś o moje cv',
+      'cvgate.intro':     'Podaj adres email — wyślę 6-cyfrowy kod weryfikacyjny.',
+      'cvgate.send':      'wyślij kod',
+      'cvgate.codeTitle': 'wpisz kod',
+      'cvgate.sentTo':    'kod wysłany na',
+      'cvgate.verify':    'zweryfikuj i pobierz',
+      'cvgate.expires':   'wygasa za',
 
       // homelab stack card
       'homelab.desc': 'Jednowęzłowy homelab działający na laptopie. Oparty na <strong>k3s</strong> — lekkiej dystrybucji Kubernetesa. Wszystkie serwisy są skonteneryzowane i zarządzane przez manifesty <strong>Kustomize</strong>. Udostępniane przez <strong>Cloudflare Tunnel</strong> — bez otwartych portów, bez publicznego IP. Platforma do nauki Kubernetesa i wdrażania własnych projektów.',
@@ -928,6 +993,7 @@
     </div>
     <div class="portfolio-actions">
       <a class="btn primary" href="/cv/CV_DevOps-SRE_mjochemski.pdf" download data-i18n="portfolio.cv" onclick="if(window.umami) umami.track('cv-download')">&#8659; download cv</a>
+      <button class="btn" type="button" id="cv-gate-open" data-i18n="portfolio.request">&#9993; request my resume</button>
       <a class="btn" href="https://linkedin.com/in/mateusz-jochemski" target="_blank" data-i18n="portfolio.linkedin">linkedin &#8599;</a>
     </div>
   </div>
@@ -1509,6 +1575,146 @@ flowchart TD
   </script>
 
   </div><!-- /page-content -->
+
+  <!-- CV GATE MODAL -->
+  <div id="cv-modal" class="modal" hidden>
+    <div class="modal-content">
+      <button class="modal-close" type="button" id="cv-modal-close" aria-label="close">&times;</button>
+
+      <div class="modal-step" id="cv-step-email">
+        <h3 data-i18n="cvgate.title">request my resume</h3>
+        <p data-i18n="cvgate.intro">Enter your email to receive a 6-digit verification code.</p>
+        <input type="email" id="cv-email" placeholder="your@email.com" autocomplete="email" />
+        <button class="btn primary" type="button" id="cv-send-btn" data-i18n="cvgate.send">send code</button>
+        <div class="modal-error" id="cv-email-error" role="alert"></div>
+      </div>
+
+      <div class="modal-step" id="cv-step-code" hidden>
+        <h3 data-i18n="cvgate.codeTitle">enter the code</h3>
+        <p><span data-i18n="cvgate.sentTo">code sent to</span> <span id="cv-user-email"></span></p>
+        <!-- one-time-code: iOS/Android podpowiada kod prosto z maila -->
+        <input type="text" id="cv-code" inputmode="numeric" autocomplete="one-time-code"
+               maxlength="6" placeholder="123456" />
+        <button class="btn primary" type="button" id="cv-verify-btn" data-i18n="cvgate.verify">verify &amp; download</button>
+        <div class="modal-error" id="cv-code-error" role="alert"></div>
+        <p class="modal-timer"><span data-i18n="cvgate.expires">expires in</span> <span id="cv-countdown">5:00</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ── CV GATE (email OTP) ───────────────────────────────────────────────────
+  // Sciezki wzgledne -> to samo origin co strona -> zero CORS-u.
+  (function() {
+    var modal = document.getElementById('cv-modal');
+    if (!modal) return;
+    var $ = function(id) { return document.getElementById(id); };
+    var timer = null;
+
+    function reset() {
+      clearInterval(timer); timer = null;   // bez tego dwa timery po ponownym otwarciu
+      $('cv-step-email').hidden = false;
+      $('cv-step-code').hidden  = true;
+      $('cv-email').value = '';
+      $('cv-code').value  = '';
+      $('cv-email-error').textContent = '';
+      $('cv-code-error').textContent  = '';
+      $('cv-send-btn').disabled   = false;
+      $('cv-verify-btn').disabled = false;
+    }
+    function closeModal() { modal.hidden = true; reset(); }
+
+    $('cv-gate-open').addEventListener('click', function() {
+      modal.hidden = false;
+      $('cv-email').focus();
+    });
+    $('cv-modal-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+
+    function countdown(seconds) {
+      clearInterval(timer);
+      var left = seconds;
+      function render() {
+        var m = Math.floor(left / 60), s = left % 60;
+        $('cv-countdown').textContent = m + ':' + (s < 10 ? '0' + s : s);
+      }
+      render();                             // od razu, bez sekundy pustki
+      timer = setInterval(function() {
+        left -= 1;
+        if (left <= 0) {                    // dekrementacja przed renderem,
+          clearInterval(timer);             // inaczej mignie "0:-1"
+          $('cv-countdown').textContent = '—';
+          $('cv-verify-btn').disabled = true;
+          return;
+        }
+        render();
+      }, 1000);
+    }
+
+    // krok 1 — wyslij kod na podany adres
+    $('cv-send-btn').addEventListener('click', function() {
+      var btn = this, email = $('cv-email').value.trim();
+      $('cv-email-error').textContent = '';
+      btn.disabled = true;                  // blokada podwojnego klikniecia
+      fetch('/cv-gate/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+      .then(function(res) {
+        return res.json().then(function(d) { return { ok: res.ok, data: d }; });
+      })
+      .then(function(r) {
+        if (!r.ok) { $('cv-email-error').textContent = r.data.error || 'request failed'; return; }
+        $('cv-step-email').hidden = true;
+        $('cv-step-code').hidden  = false;
+        $('cv-user-email').textContent = email;
+        $('cv-code').focus();
+        countdown(r.data.expiresIn || 300);
+      })
+      .catch(function() { $('cv-email-error').textContent = 'network error'; })
+      .finally(function() { btn.disabled = false; });
+    });
+
+    // krok 2 — zweryfikuj kod; odpowiedzia sa bajty PDF-a, nie JSON
+    $('cv-verify-btn').addEventListener('click', function() {
+      var btn   = this;
+      var email = $('cv-user-email').textContent;
+      var code  = $('cv-code').value.trim();
+      $('cv-code-error').textContent = '';
+      btn.disabled = true;
+      fetch('/cv-gate/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, code: code })
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          return res.json().then(function(d) {
+            $('cv-code-error').textContent = d.error || 'verification failed';
+          });
+        }
+        return res.blob().then(function(blob) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'CV_DevOps-SRE_mjochemski.pdf';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          if (window.umami) umami.track('cv-request-gated');
+          closeModal();
+        });
+      })
+      .catch(function() { $('cv-code-error').textContent = 'network error'; })
+      .finally(function() { btn.disabled = false; });
+    });
+  })();
+  </script>
 
 </body>
 </html>
