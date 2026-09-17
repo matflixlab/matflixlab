@@ -52,18 +52,14 @@ data:
                     'from': FROM_EMAIL,
                     'to': [email],
                     'subject': "Request for Mateusz Jochemski's resume.",
-                    # Kod w osobnej linii, z pustymi liniami nad i pod -
-                    # zaznaczenie dwuklikiem lapie sam kod, bez etykiety.
                     'text': (
                         'Hi,\n\n'
-                        "You requested a copy of Mateusz Jochemski's resume "
-                        'from matflixlab.pl.\n\n'
+                        'You requested a copy of Mateusz Jochemski's resume.\n\n'
                         'Enter this verification code to start the download:\n\n'
                         f'{code}\n\n'
                         'The code is valid for 5 minutes and can be used once.\n\n'
                         'If you did not request this, you can ignore this message.\n\n'
                         '--\n'
-                        'Mateusz Jochemski | DevOps / SRE\n'
                         'https://matflixlab.pl\n'
                     ),
                 },
