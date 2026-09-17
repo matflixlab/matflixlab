@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /cv/
 
 Sitemap: https://matflixlab.pl/sitemap.xml
