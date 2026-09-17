@@ -6,7 +6,7 @@ metadata:
   labels:
     app: dev-tech-news
 spec:
-  schedule: "0 9 * * *"
+  schedule: "0 6 * * *"
   # Without this the schedule is UTC and silently drifts an hour twice a year.
   timeZone: "Europe/Warsaw"
   # A slow run must never overlap the next day's — two runs racing on the same
