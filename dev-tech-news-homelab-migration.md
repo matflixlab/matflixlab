@@ -51,10 +51,12 @@ Three mitigations, all cheap, and the first is non-negotiable:
 1. **A hard `resources.limits.memory` on the CronJob pod.** This is what
    turns "the node OOMs and random pods die" into "the newsletter job dies
    and retries tomorrow". Start at 1.5–2Gi.
-2. **Keep `--crawl-concurrency 2`** in the container args (see §0.3.1 for
+2. **`--crawl-concurrency 1`** in the container args (see §0.3.1 for
    why the default of 8 is unsafe — the per-site and per-article limits
-   multiply, so the real worst case is the square). Consider starting at 1
-   on this box and raising it only if runs are too slow.
+   multiply, so the real worst case is the square). Started at 2; dropped
+   to 1 on 2026-09-17 after the first run here hit 343% sys load with swap
+   in use. Worst case is now 1 concurrent Chromium instead of 4. Raise it
+   again only if runs get too slow — they run at 06:00, so they won't.
 3. **`concurrencyPolicy: Forbid`** on the CronJob, so a slow run can never
    overlap with the next day's — we hit exactly that failure mode manually
    on Tencent (two containers racing on the same `processed_urls.json`).
@@ -143,7 +145,7 @@ Key details that aren't boilerplate:
 - **`resources.limits.memory`** as argued above. Also set requests, so the
   scheduler accounts for it rather than overcommitting the node.
 - **Args**: keep the full flag set from the systemd unit, including
-  `--crawl-concurrency 2` and `--site-dir /data/site`.
+  `--crawl-concurrency 1` and `--site-dir /data/site`.
 - **Both** the CronJob and the nginx Deployment mount the same PVC — the job
   writes, nginx serves read-only. RWO is fine: single node, so they're
   always co-located.

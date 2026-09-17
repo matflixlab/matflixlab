@@ -62,9 +62,12 @@ spec:
                 # Keep this low. The default of 8 took a dedicated 2 vCPU/4GB
                 # VM down twice (CHANGELOG §0.3.1) — the per-site and
                 # per-article limits multiply, so worst case is the square.
-                # This box is shared with everything else in the homelab.
+                # This box is shared with everything else in the homelab, and
+                # the first run here pushed it to 343% sys load with swap in
+                # use, so 1 it is: worst case 1 Chromium instead of 4. Costs
+                # only wall-clock, at 06:00, where nothing is waiting on it.
                 - --crawl-concurrency
-                - "2"
+                - "1"
               env:
                 - name: OPENAI_API_KEY
                   valueFrom:
