@@ -12,7 +12,7 @@ data:
     app = Flask(__name__)
 
     RESEND_API_KEY = os.environ['RESEND_API_KEY']
-    FROM_EMAIL     = os.environ.get('FROM_EMAIL', 'matflixlab <cv@send.matflixlab.pl>')
+    FROM_EMAIL     = os.environ.get('FROM_EMAIL', 'matflixlab.pl <cv@send.matflixlab.pl>')
     CV_PATH        = os.environ.get('CV_PATH', '/cv/CV_DevOps-SRE_mjochemski.pdf')
     TTL            = 300
 
@@ -51,9 +51,21 @@ data:
                 json={
                     'from': FROM_EMAIL,
                     'to': [email],
-                    'subject': 'Your CV download code',
-                    'text': (f'Your verification code: {code}\n\n'
-                             'Valid for 5 minutes.\n\n-- matflixlab.pl'),
+                    'subject': "Request for Mateusz Jochemski's resume.",
+                    # Kod w osobnej linii, z pustymi liniami nad i pod -
+                    # zaznaczenie dwuklikiem lapie sam kod, bez etykiety.
+                    'text': (
+                        'Hi,\n\n'
+                        "You requested a copy of Mateusz Jochemski's resume "
+                        'from matflixlab.pl.\n\n'
+                        'Enter this verification code to start the download:\n\n'
+                        f'{code}\n\n'
+                        'The code is valid for 5 minutes and can be used once.\n\n'
+                        'If you did not request this, you can ignore this message.\n\n'
+                        '--\n'
+                        'Mateusz Jochemski | DevOps / SRE\n'
+                        'https://matflixlab.pl\n'
+                    ),
                 },
                 timeout=10,
             )
