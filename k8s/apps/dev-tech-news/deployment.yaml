@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-tech-news-web
+  namespace: matflixlab
+  labels:
+    app: dev-tech-news-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dev-tech-news-web
+  template:
+    metadata:
+      labels:
+        app: dev-tech-news-web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "10m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          volumeMounts:
+            # subPath so nginx's default docroot maps to just the site/
+            # subdirectory of the shared PVC — the CronJob also writes
+            # processed_urls.json at the volume root, which has no business
+            # being served over HTTP.
+            - name: data
+              mountPath: /usr/share/nginx/html
+              subPath: site
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: dev-tech-news-data-pvc

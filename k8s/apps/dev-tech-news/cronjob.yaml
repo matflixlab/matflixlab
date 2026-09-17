@@ -1,0 +1,101 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dev-tech-news
+  namespace: matflixlab
+  labels:
+    app: dev-tech-news
+spec:
+  schedule: "0 9 * * *"
+  # Without this the schedule is UTC and silently drifts an hour twice a year.
+  timeZone: "Europe/Warsaw"
+  # A slow run must never overlap the next day's — two runs racing on the same
+  # processed_urls.json is a failure mode we already hit manually on the old
+  # Tencent VM.
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      # One retry, not the default six — a systematically broken run (e.g. the
+      # 401 API-key outage that ran silently for five days) shouldn't burn six
+      # rounds of crawling every morning.
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: dev-tech-news
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            # Belt-and-braces so the container user can write the PVC. k3s's
+            # local-path provisioner already creates volume dirs world-writable
+            # (speakstats relies on the same thing), so this is redundant today
+            # but harmless — and it's what saves you if that ever changes.
+            fsGroup: 1000
+          containers:
+            - name: dev-tech-news
+              image: localhost:30500/dev-tech-news:latest
+              # Deliberately bypassing the image's `uv run` ENTRYPOINT and
+              # calling the venv interpreter directly, because this sets
+              # workingDir=/data — and `processed_urls.json` is a hardcoded
+              # CWD-relative path in the app. Running from /data is what puts
+              # the URL ledger on the PVC instead of the pod's ephemeral layer,
+              # where it would be lost after every run (and every article
+              # re-analysed daily, which is exactly the LLM spend that file
+              # exists to prevent). Hence also the absolute /app/... paths.
+              workingDir: /data
+              command: ["/app/.venv/bin/python"]
+              args:
+                - /app/scripts/generate_newsletter.py
+                - --feeds
+                - /app/feeds.csv
+                - --scraping-websites
+                - /app/scraping_websites.csv
+                - --conference-sources
+                - /app/conference_sources.csv
+                - --site-dir
+                - /data/site
+                - --days
+                - "1"
+                # Keep this low. The default of 8 took a dedicated 2 vCPU/4GB
+                # VM down twice (CHANGELOG §0.3.1) — the per-site and
+                # per-article limits multiply, so worst case is the square.
+                # This box is shared with everything else in the homelab.
+                - --crawl-concurrency
+                - "2"
+              env:
+                - name: OPENAI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: dev-tech-news-secret
+                      key: OPENAI_API_KEY
+                - name: OPENAI_MODEL
+                  value: "gpt-5-nano"
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "200m"
+                limits:
+                  # The important one: this turns "the node OOMs and random
+                  # pods die" into "the newsletter job dies and retries
+                  # tomorrow". Observed peak on the old VM was ~1.4Gi.
+                  memory: "2Gi"
+                  cpu: "2000m"
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                - name: dshm
+                  mountPath: /dev/shm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: dev-tech-news-data-pvc
+            # Containers default to a 64MB /dev/shm, which headless Chromium
+            # is notorious for crashing on — and it fails confusingly, as
+            # crawls that silently return nothing rather than an error.
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 256Mi
