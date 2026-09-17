@@ -54,7 +54,7 @@ data:
                     'subject': "Request for Mateusz Jochemski's resume.",
                     'text': (
                         'Hi,\n\n'
-                        'You requested a copy of Mateusz Jochemski's resume.\n\n'
+                        "You requested a copy of Mateusz Jochemski's resume.\n\n"
                         'Enter this verification code to start the download:\n\n'
                         f'{code}\n\n'
                         'The code is valid for 5 minutes and can be used once.\n\n'
